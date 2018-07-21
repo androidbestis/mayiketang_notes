@@ -1,0 +1,2 @@
+部署哨兵模式的时候，使用的命令如下：
+./redis-server.sh sentinel.conf --sentinel
