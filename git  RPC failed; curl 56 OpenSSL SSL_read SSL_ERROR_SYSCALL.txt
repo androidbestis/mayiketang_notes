@@ -1,0 +1,18 @@
+					       git错误
+error: RPC failed; curl 56 OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 10054
+fatal: The remote end hung up unexpectedly
+fatal: The remote end hung up unexpectedly
+Everything up-to-date
+
+
+该项目由于时代久远，所以导致整个项目比较复杂庞大。出现这种错误，就是因为curl的postBuffer默认值太小的原因，重新在终端配置一下这个值就可以了。
+
+【解决方法】
+
+lysmacbookair:opt laoyan$ git config --global http.postBuffer 114288000
+
+修改此项后还出现上面的报错，则继续调大114288000 至更高的数字
+
+lysmacbookair:exploit-database laoyan$ git config --list
+
+查看到上面的修改值则修改成功了
