@@ -1,0 +1,42 @@
+方案一：
+如果没有并发，订单号只在一个线程内产生，那么由于程序是顺序执行的，不同订单的生成时间戳正常不同，因此用时间戳 + 随机数（或自增数）就可以区分各个订单。
+如果存在并发，且订单号是由一个进程中的多个线程产生的，那么只要把线程 ID 添加到序列号中就可以保证订单号唯一。
+如果存在并发，且订单号是由同一台主机中的多个进程产生的，那么只要把进程 ID 添加到序列号中就可以保证订单号唯一。
+如果存在并发，且订单号是由不同台主机产生的，那么 MAC 地址、IP 地址或 CPU 序列号等能够区分主机的号码添加到序列号中就可以保证订单号唯一。
+
+方案二：
+时间戳 + 用户 ID+ 几个随机数 + 乐观锁。
+
+方案三：
+用 redis 的原子递增，做好高可用集群。
+
+方案四（非纯数字）：
+java 自带 uuid。
+
+方案五:
+Twitter雪花算法(snowflake)
+
+事例代码
+java 获取线程 ID
+
+
+1.  Thread.currentThread().getId()  
+java 获取进程 ID
+
+
+1.  //java获取进程ID  
+2.  RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();  
+3.  Field jvm = runtime.getClass().getDeclaredField("jvm");  
+4.  jvm.setAccessible(true);  
+5.  VMManagement mgmt = (VMManagement) jvm.get(runtime);  
+6.  Method pidMethod = mgmt.getClass().getDeclaredMethod("getProcessId");  
+7.  pidMethod.setAccessible(true);  
+8.  int pid = (Integer) pidMethod.invoke(mgmt);  
+java 获取 mac 地址
+
+
+1.  InetAddress ia = InetAddress.getLocalHost();  
+2.  byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();  
+3.  String macStr = DatatypeConverter.printHexBinary(mac);  
+
+===========实例代码看uniqueOrderId.java

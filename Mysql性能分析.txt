@@ -1,0 +1,52 @@
+							MySQL explain 执行计划解读
+1.使用explain语句去查看分析结果
+如 explain select * from t_user where id=1; 
+会出现：
+id    select_type table   type   possible_keys    key   key_len  ref   rows    extra 各列。
+1	SIMPLE	  t_user  const	   PRIMARY	PRIMARY	   4	const	1	null	
+其中:
+type=const表示通过索引一次就找到了;
+key=primary表示使用了主键;
+type=all表示为全表扫描;
+key=null表示没有用到索引;
+type=ref因为这时认为是多个匹配行,在联合查询中,一般为REF。
+2.Mysql中的组合索引
+假设表有id,key1,key2,key3,把三者形成一个组合索引
+则如:
+where key1=...
+where key1=1 and key2=2
+where key1=3 and key2=3 and key3=2
+根据最左前缀原则,这些都是可以使用索引的,如from t_user where key1=1 order by key3,用explain分析的话,只用到了normal_key索引,但只对where子句起作用,而后面的order by需要排序。
+3.使用慢查询分析(实用)
+字my.ini中:
+longquerytime=1
+log-slow-queries=d:\mysql5\logs\mysqlslow.log
+把超过1秒的记录在慢查询日志中
+可使用mysqlsla来分析之。也可以在mysqlreport中,比如:
+DMS 分别分析了 select ,update,insert,delete,replace 等所占的百分比
+4.MyIsam和InnoDB的锁定
+myisam中,注意是表锁。比如:在多个update操作后,再select时,会发现select操作被锁定了,必须等所有的update操作完毕后,才能select。
+innodb中,用的是行锁,不存在上面问题。
+5.Mysql的事务配置项
+innodbflushlogattrx_commit=1
+表示事务提交时立即把事务日志flush写入磁盘,同时数据和索引也更新,很费性能。
+innodbflushlogattrx_commit=0
+事务提交时,不立即把事务日志写入磁盘,每隔1秒写一次,Mysql挂了可能会丢失事务的数据。
+innodbflushlogattrx_commit=2 
+在整个操作系统 挂了时才可能丢数据，一般不会丢失超过 1-2 秒的更新。
+事务提交时，立即写入磁盘文件（这里只是写入到系统内核缓冲区，但不立即刷新到磁盘，而是每隔 1 秒刷新到磁盘，同时更新数据和索引），这种方案是不是性价比好一些，当然如何配置，决定于你对系统数据安全性的要求。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

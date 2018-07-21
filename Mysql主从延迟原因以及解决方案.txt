@@ -1,0 +1,52 @@
+					 mysql主从延迟原因以及解决方案
+1.Mysql数据库主从同步延迟原理
+2.Mysql数据库主从同步延迟是怎么产生的
+3.Mysql数据库主从同步延迟解决方案
+4.Mysql数据库主从同步延迟产生的因素
+=====================================================
+1.Mysql数据库主从同步延迟原理
+mysql数据库主从复制原理,mysql的主从复制都是单线程的操作,主库对所有DDL和DML产生binlog,binlog是顺序写,所以效率很高;
+slave的SlaveIORunning线程会到主库取日志,效率会比较高,Slave的SlaveSQLRunning线程将主库的DDL和DML操作都在slave实施。
+DDL和DML的IO操作是随机的,不是顺序的,因此成本会很高,还有可能是slave上的其他查询产生lock争用,由于SlaveSQLRunning也是单线程的,所以一个DDL卡住了,需要执行10分钟,那么所有之后的DDL会等待这个DDL执行完才会继续执行,这就导致了延时。主库master可以并发,所以不会延时。SlaveSQLRUnning线程却不可以。
+2.Mysql数据库主从同步延迟是怎么产生的。
+①当主库的TPS并发较高时,产生的DDL数量超过slave一个线程所能承受的范围,那么延时就产生了。
+②slave的大型query语句产生了锁等待。
+3.Mysql数据库主从同步延迟解决方案
+-最简单的减少slave同步延时的方案就是在架构上做优化,尽量让主库的DDL快速执行。
+-还有就是主库是写,对数据安全性较高,比如syncbinlog=1,innodbflushlogattrxcommit=1之类的设置,而slave则不需要这么高的数据安全,完全可以将syncbinlog设置为0或者关闭binlog,innodbflushlog也可以设置为0来提高sql的执行效率。
+-使用比主库更好的硬件设备作为slave。
+
+4.Mysql数据库主从同步延迟产生的因素
+①网络延迟
+②master负载
+③slave负载
+一般做法:使用多台slave来分摊读请求,再从这些slave中取一台专用的服务器,只作为备份用,不进行其他任何操作,就能相对最大限度地达到"实时"的要求了。
+
+另外,再介绍2个可以减少延迟的参数
+-slave-net-timeout = seconds
+参数含义:当slave从主数据读取log数据失败后,等待多久重新建立连接并获取数据
+slavenettimeout单位为秒 默认设置为3600秒
+|slavenettimeout|3600
+-master-connect-retry=seconds
+参数含义:当重新建立主从连接时,如果连接建立失败,间隔多久后重试。
+master-connect-retry单位为秒 默认设置为60秒
+通常配置以上 2 个参数可以减少网络问题导致的主从数据同步延迟
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

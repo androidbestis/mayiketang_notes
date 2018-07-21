@@ -1,0 +1,27 @@
+一、在 github.com 上创建新的仓库
+
+打开Git Shell，进入本地工程
+
+pushd E:\Projects\Forest
+
+git init
+
+git add .
+
+git commit -m “create project”
+
+git remote add origin https://github.com/zhenghaishu/Forest.git
+
+git push -u origin master
+
+二、更新后提交
+
+git add .
+
+git commit -m “add spring-mvc”
+
+git push
+
+三、撤销本地未提交的更改
+
+git reset –hard

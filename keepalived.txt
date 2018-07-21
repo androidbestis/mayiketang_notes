@@ -1,0 +1,17 @@
+简介
+Keepalived的作用是检测服务器的状态，如果有一台web服务器宕机，或工作出现故障，Keepalived将检测到，并将有故障的服务器从系统中剔除，同时使用其他服务器代替该服务器的工作，当服务器工作正常后Keepalived自动将服务器加入到服务器群中，这些工作全部自动完成，不需要人工干涉，需要人工做的只是修复故障的服务器。
+
+工作原理
+Layer3,4,5工作在IP/TCP协议栈的IP层，TCP层，及应用层,原理分别如下：
+Layer3：Keepalived使用Layer3的方式工作式时，Keepalived会定期向服务器群中的服务器发送一个ICMP的数据包（既我们平时用的Ping程序）,如果发现某台服务的IP地址没有激活，Keepalived便报告这台服务器失效，并将它从服务器群中剔除，这种情况的典型例子是某台服务器被非法关机。Layer3的方式是以服务器的IP地址是否有效作为服务器工作正常与否的标准。
+Layer4:如果您理解了Layer3的方式，Layer4就容易了。Layer4主要以TCP端口的状态来决定服务器工作正常与否。如web server的服务端口一般是80，如果Keepalived检测到80端口没有启动，则Keepalived将把这台服务器从服务器群中剔除。
+Layer5：Layer5对指定的URL执行HTTP GET。然后使用MD5算法对HTTP GET结果进行求和。如果这个总数与预期值不符，那么测试是错误的，服务器将从服务器池中移除。该模块对同一服务实施多URL获取检查。如果您使用承载多个应用程序服务器的服务器，则此功能很有用。此功能使您能够检查应用程序服务器是否正常工作。MD5摘要是使用genhash实用程序（包含在keepalived软件包中）生成的。
+SSL_GET与HTTP_GET相同，但使用SSL连接到远程Web服务器。
+MISC_CHECK：此检查允许用户定义的脚本作为运行状况检查程序运行。结果必须是0或1.该脚本在导演盒上运行，这是测试内部应用程序的理想方式。可以使用完整路径（即/path_to_script/script.sh）调用可以不带参数运行的脚本。那些需要参数的需要用双引号括起来（即“/path_to_script/script.sh arg 1 ... arg n”）
+
+作用
+主要用作RealServer的健康状态检查以及LoadBalance主机和BackUP主机之间failover的实现。
+高可用web架构: LVS+keepalived+nginx+apache+php+eaccelerator（+nfs可选 可不选）
+
+
+keepalived 配合上 ipvsadm 又可以做负载均衡，可谓是神器。

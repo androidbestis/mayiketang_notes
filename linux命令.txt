@@ -1,0 +1,18 @@
+端口开放
+1.输入firewall-cmd --query-port=6379/tcp，如果返回结果为no，那么证明6379端口确实没有开启。
+2.输入firewall-cmd --add-port=6379/tcp，将6379端口开启，返回success。证明端口已经成功开启。
+
+
+
+
+3.第一次提交代码
+git init
+git add .
+git config user.name 'xxx'
+git config user.email '1111@qq.com'
+git pull https://git.oschina.net/xxx/maple.git master
+git remote add origin https://git.oschina.net/xxx/maple.git
+git commit -am 'init'
+git push -u origin master
+
+如果你确定远程分支上那些提交都不需要了，那么直接git push origin master -f，强行让本地分支覆盖远程分支。。。

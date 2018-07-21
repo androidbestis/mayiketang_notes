@@ -1,0 +1,51 @@
+					git push上传代码到gitlab上，报错401/403(或需要输入用户名和密码)
+error: The requested URL returned error: 401 Unauthorized while accessing http://git.xqshijie.net:8081/weixin/weixin.git/info/refs
+fatal: HTTP request failed
+
+或者
+The requested URL returned error: 403 Forbidden while accessing
+
+解决办法：
+在代码的.git/config文件内[remote "origin"]的url的gitlab域名前添加gitlab注册时的“用户名:密码@”
+另外发现这个用户要在对应项目下的角色是Owner或Master才行，如果是Guest、Reporter、Developer，则如下操作后也是不行。
+如下，gitlab的用户名是wangshibo，假设密码是HU@wew12378!h8
+
+
+然后修改代码里的.git/config文件
+[root@test-huanqiu weixin]# cd .git
+[root@test-huanqiu .git]# cat config 
+[core]
+repositoryformatversion = 0
+filemode = true
+bare = false
+logallrefupdates = true
+[remote "origin"]
+fetch = +refs/heads/*:refs/remotes/origin/*
+url = http://git.wangshibo.net:8081/weixin/weixin.git
+[branch "master"]
+remote = origin
+merge = refs/heads/master
+
+修改如下：
+[root@test-huanqiu .git]# cat config 
+[core]
+repositoryformatversion = 0
+filemode = true
+bare = false
+logallrefupdates = true
+[remote "origin"]
+fetch = +refs/heads/*:refs/remotes/origin/*
+url = http://wangshibo:HU@wew12378!h8@git.wangshibo.net:8081/weixin/weixin.git
+[branch "master"]
+remote = origin
+merge = refs/heads/master
+
+然后再次git push，发现可以正常提交了！
+[root@test-huanqiu weixin]# git push
+Counting objects: 4, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 297 bytes, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To http://wangshibo:HUIhui1987521@git.xqshijie.net:8081/weixin/weixin.git
+8fcb559..6c97b56 master -> master

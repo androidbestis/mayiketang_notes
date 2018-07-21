@@ -1,0 +1,25 @@
+					Linux Redis 重启数据丢失解决方案，Linux 重启后 Redis 数据丢失解决方
+这个问题只在 Linux 系统才存在，在 Windows 系统是没有问题的。
+只有在 Linux 系统重启才会丢失，Redis 重启应该是没有问题的。
+
+解决方案：
+在 Linux 系统设置一个参数（vm.overcommit_memory）即可解决。
+
+步骤如下：
+
+1、编辑 sysctl.conf 配置文件
+
+Java 代码
+
+vi /etc/sysctl.conf
+2、另起一行增加参数 vm.overcommit_memory 配置，如下
+
+Java 代码
+
+vm.overcommit_memory = 1
+3、使配置文件生效
+
+Java 代码
+
+sysctl -p
+到这里已经结束，在 Redis 增加些数据，再重启 Linux 系统查看数据有没有丢失。
