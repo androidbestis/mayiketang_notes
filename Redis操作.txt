@@ -1,0 +1,59 @@
+===========================================================
+1.比较重要的3个可执行文件:
+.redis-server: Redis服务器程序,用于启动redis服务器
+.redis-cli: Redis客户端程序,它是一个命令行操作工具。也可以使用《telnet》根据其纯文本协议操作。
+.redis-benchmark(基准): Redis性能测试工具,测试Redis在你的系统及配置下的《读写性能》。
+
+===========================================================
+2.Redis的启动命令:
+①.  redis/bin/redis-server
+②.  redis/bin/redis-server  /redis/etc/redis.conf 为 redis-server 指定配置文件
+===========================================================
+3.Redis的配置
+下面列举了 Redis 中的一些常用配置项：
+
+daemonize 如果需要将 Redis 服务以<守护进程>在<后台运行。，则把该项的值改为 yes
+pidfile 配置多个 pid 的地址，默认在 /var/run/redis/pid
+bind 绑定 ip，设置后只接受来自该 ip 的请求
+port 监听端口，默认是 6379
+timeout 客户端连接超时的设定，单位是秒
+loglevel 分为 4 级，debug、verbose、notice、warning
+logfile 配置 log 文件地址
+databases 设置数据库的个数，默认使用的数据库为 0
+save 设置 redis 进行数据库镜像的频率
+rdbcompression 在进行镜像备份时，是否进行压缩
+Dbfilename 镜像备份文件的文件名
+Dir 数据库镜像备份文件的存放路径
+Slaveof 设置数据库为其他数据库的从数据库
+Masterauth 主数据库连接需要的密码验证
+Requirepass 设置登录时，需要使用的密码
+Maxclients 设置同时连接的最大客户端数量
+Maxmemory 设置 redis 能够使用的最大内存
+Appendonly 开启 append only 模式
+Appendfsync 设置对 appendonly.aof 文件同步的频率
+vm-enabled 是否开启虚拟内存支持
+vm-swap-file 设置虚拟内存的交换文件路径
+vm-max-memory 设置 redis 能够使用的最大虚拟内存
+vm-page-size 设置虚拟内存的页大小
+vm-pages 设置交换文件的总的 page 数量
+vm-max-threads 设置 VMIO 同时使用的线程数量
+Glueoutputbuf 把小的输出缓存存放在一起
+hash-max-zipmap-entries 设置 hash 的临界值
+Activerehashing 重新 hash
+===========================================
+修改 redis 的配置参数：
+vi /usr/local/redis/etc/redis.conf
+将 daemonize no 改为 daemonize yes，保存退出。
+
+再来启动 redis 服务器
+cd /usr/local/redis/bin
+./redis-server /usr/local/redis/etc/redis.conf 启动 redis 并指定配置文件
+
+ps aux | grep redis 查看 redis 是否启动成功
+ps -ef | grep redis 查看 redis 是否启动成功
+netstat -tlun 查看主机的 6379 端口是否在使用（监听）
+
+./redis-cli 打开 redis 的客户端
+quit 退出 redis 的客户端
+pkill redis-server 关闭 redis 服务器
+./redis-cli shutdown 也可以通过这条命令关闭 redis 服务器
