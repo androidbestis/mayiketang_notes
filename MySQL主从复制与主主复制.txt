@@ -1,0 +1,135 @@
+							Mysql主从复制与主主复制
+1.简介
+ 在实际的生产环境中，由单台MySQL数据库服务器不能满足实际的需求。此时数据库集群就很好的解决了这个问题了。采用MySQL分布式集群，能够搭建一个高并发、负载均衡的集群服务器（这篇博客暂时不涉及）。在此之前我们必须要保证每台MySQL服务器里的数据同步。数据同步我们可以通过MySQL内部配置就可以轻松完成，主要有主从复制和主主复制。
+
+=================================================================================
+Mysql主从复制
+-配置文件(一般Linux中的MySQL配置文件都在/etc/my.cnf(windows中的配置文件为mysql.ini))
+ log-bin=mysql-bin 开启二进制日志
+ 注意：二进制日志必须开启，因为数据的同步实质上就是其他的MySQL数据库服务器将这个数据变更的二进制日志在本机上再执行一遍。
+  192.168.95.11  为主数据库服务器
+  192.168.95.12  为从数据库服务器
+-开始构建主从复制
+ ①第一步:
+ 在192.168.95.11(主库)中创建一个192.168.95.12(从库)中可以登录的Mysql用户
+ 用户:mysql12
+ 密码:mysql12
+ mysql>grant replication slave on *.* to 'mysql12'@'192.168.95.12' identified by 'mysql12';
+ mysql>flush privileges;
+ ②第二步:
+ 查看192.168.95.11(主库)Mysql服务器二进制文件名与位置
+ mysql>show master status;
+ +----------------+---------+------------+----------------+
+ |     File       |Position |Binlog_Do_DB|Binlog_Ignore_DB|
+ +----------------+---------+------------+----------------+
+ |mysql-bin.000048|   432   |            |                |
+ +----------------+---------+------------+----------------+
+ ③第三步:
+  告知二进制文件名与位置
+  在192.168.95.12(从库)中执行:
+  mysql>change master to
+      ->master_host='192.168.95.11',
+      ->master_user='mysql12',
+      ->master_password='mysql12',
+      ->master_log_file='mysql-bin.000048',
+      ->master_log_pos='432';
+完成主从复制配置
+-测试主从复制
+ 在192.168.95.12(从库)中
+ mysql>start slave;    --开启复制
+ mysql>show slave status\G  --查看主从复制是否配置成功
+
+ 当看到Slave_IO_Running:yes、Slave_SQL_Running:yes才表明状态正常
+
+
+=================================================================================
+Mysql主主复制
+ 实现原理:主主复制即在两台Mysql主机内都可以变更数据,而且另外一台主机也会做出相应的变更。就是将两个主从复制有机合并起来就好了。只不过在配置的时候我们需要注意一些问题，例如，主键重复，server-id不能重复等等。
+-配置文件
+ --192.168.95.11
+ server-id=11                 ##任意自然数n,只要保证两台Mysql主机不重复就可以了。
+ log-bin=mysql-bin   	      ##开启二进制日志
+ auto_increment_increment=2   ##步进值auto_increment。一般有n台主Mysql就填n
+ auto_increment_offset=1      ##起始值。一般填第n台主Mysql。此时为第一台主Mysql
+ binlog-ignore=mysql          ##忽略mysql库【我一般都不写】   
+ binlog-ignore=information_schema  ##忽略information_schema库【我一般都不写】
+ replicate-do-db=aa	      ##要同步的数据库,默认为所有库
+ --192.168.95.12
+ server-id=12
+ log-bin=mysql-bin
+ auto_increment_increment=2
+ auto_increment_offset=2
+ replicate-do-db=aa
+配置好后重启MySQL
+--开始构建主主复制
+ 因为主主复制是两个主从复制组合一起,所以我就接着上面主从复制接着配置。
+ ①第一步:
+ 在192.168.95.12中创建一个192.168.95.11主机可以登录的Mysql用户
+ 用户：mysql11
+ 密码：mysql11
+ mysql>grant replication slave on *.* to 'mysql11' @ '192.168.95.11' identified by 'mysql11';
+ mysql>flush privileges;
+ ②第二步:
+ 在192.168.95.12查看二进制日志名和位置
+ mysql>show master status;
+ +----------------+---------+------------+----------------+
+ |     File       |Position |Binlog_Do_DB|Binlog_Ignore_DB|
+ +----------------+---------+------------+----------------+
+ |mysql-bin.000084|   107   |            |                |
+ +----------------+---------+------------+----------------+
+ ③第三步:
+ 告知二进制文件名与位置
+  在192.168.95.11中执行：
+  mysql>CHANGE MASTER TO
+       ->MASTER_HOST=’192.168.95.12’,
+       ->MASTER_USER=’mysql11’,
+       ->MASTER_PASSWORD=’mysql11’,
+       ->MASTER_LOG_FILE=’mysql-bin.000084’,
+       ->MASTER_LOG_POS=107;
+完成主主复制配置
+--测试主主复制
+分别开启start slave;
+ mysql>show slave status\G   ##查看主从复制是否配置成功
+ 192.168.95.11
+ 当看到Slave_IO_Running: YES、Slave_SQL_Running: YES才表明状态正常
+ 192.168.95.12
+ 当看到Slave_IO_Running: YES、Slave_SQL_Running: YES才表明状态正常
+主主复制配置成功！
+
+=================================================================================
+注意事项
+1.主主复制配置文件中auto_increment和auto_increment_offset只能保证《主键不重复》,却<不能>保证《主键有序》。
+2.当配置完成Slave_IO_Running、Slave_SQL_Running不全为YES时，show slave status\G信息中有错误提示，可根据错误提示进行更正。
+3.Slave_IO_Running、Slave_SQL_Running不全为YES时，大多数问题都是数据不统一导致。
+常见出错点：
+1、两台数据库都存在db数据库，而第一台MySQL db中有tab1，第二台MySQL db中没有tab1，那肯定不能成功。
+
+2、已经获取了数据的二进制日志名和位置，又进行了数据操作，导致POS发生变更。在配置CHANGE MASTER时还是用到之前的POS。
+
+3、stop slave后，数据变更，再start slave。出错。
+
+ 终极更正法：重新执行一遍CHANGE MASTER就好了。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
