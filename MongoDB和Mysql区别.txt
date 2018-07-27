@@ -1,0 +1,20 @@
+							 MongoDB和Mysql的区别
+Mysql是传统的关系型数据库。
+MongoDB是非关系型数据库,也叫《文档型》数据库,是一种NoSql数据库。
+
+MongoDB(文档型数据库):提供可扩展的高性能数据存储。
+
+一、
+1.基于分布式文件存储
+2.高负载情况下添加更多节点,可以保证服务器性能
+3.将数据存储为一个文档
+4.MongoDB对数据间的事务关系支持比较弱
+
+mongodb 与 mysql 命令对比:传统的关系数据库一般由数据库（database）、表（table）、记录（record）三个层次概念组成。
+mongodb是由数据库(database)、集合(collection)、文档对象(document)三个层次组成。
+
+MongoDB 对于关系型数据库里的表，但是集合中没有列、行和关系概念，这体现了模式自由的特点。
+
+与关系型数据库相比，MongoDB 的缺点：
+① mongodb 不支持事务操作。
+② mongodb 占用空间过大。

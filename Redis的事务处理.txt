@@ -1,0 +1,69 @@
+						     Redis的事务处理
+
+Redis的事务操作
+1.multi   开启事务
+2.exec    提交事务
+3.discard 取消事务
+127.0.0.1:6379> multi 
+OK
+127.0.0.1:6379> set djk fdjs
+QUEUED
+127.0.0.1:6379> set djklg djgl
+QUEUED
+127.0.0.1:6379> discard
+OK
+127.0.0.1:6379> exec
+(error) ERR EXEC without MULTI
+
+4.watch   监听key值
+watch:在事务开启之前监听一个或多个keys值,如果在事务执行时,客户端进行修改该值,那么事务不执行。
+127.0.0.1:6379> watch hello
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> set hello ffff
+QUEUED
+127.0.0.1:6379> set name zll
+QUEUED
+127.0.0.1:6379> exec
+(nil)
+
+===================================================
+Jedis实例
+public class JedisTransaction {
+    private Jedis jedis;
+    @Before
+    public void beforeJedis(){
+        jedis = JedisConnection.jedisConnection();
+    }
+    @Test
+    public void testTransaction(){
+        //事务一旦执行，客户端发来的请求都不能打断。
+        //开启一个事务
+        Transaction transaction = jedis.multi();
+        transaction.set("hello", "world!");
+        transaction.mset("hashset_keys","nnnn");
+        transaction.lpush("list_key","hhhh");
+        transaction.lpush("list_key","xxx");
+        transaction.exec();
+        System.out.println("=="+jedis.keys("*"));
+    }
+    @Test
+    public void testWatch(){
+        jedis.watch("name");
+        Transaction transaction = jedis.multi();
+        transaction.set("hello", "world!");
+        //此时用客户端，对name进行修改操作。
+        transaction.mset("name","tttt");
+        transaction.lpush("age","444");
+        System.out.println(transaction.exec());
+    }
+    @Test
+    public void testDiscard(){
+        Transaction transaction = jedis.multi();
+        transaction.set("hello", "world!");
+        //取消事务
+        System.out.println(transaction.discard());
+    }
+}
+
