@@ -1,0 +1,15 @@
+							Linux下Redis设置登录密码
+redis设置密码访问
+你的 redis 在真是环境中不可以谁想访问就可以访问，所以必须要设置密码
+
+-设置密码的流程:
+ vim /etc/redis.conf
+ #requirepass foobared 去掉注释,foobared改为自己的密码,我这里改为
+  requirepass 123456
+ 然后保存,重启服务
+ cd /usr/local/bin
+ ./redis-server /etc/redis.conf
+ 测试连接：./redis-cli
+ 输入命令 会提示(error) NOAUTH Authentication required. 这是属于正常现象。
+我们输入 auth 123456#你刚才设置的密码
+ 
