@@ -1,0 +1,7 @@
+						   启动 redis
+进入安装目录 /usr/local/redis/bin 下有几个可执行文件:
+1.redis-benchmark ----性能测试工具
+2.redis-check-aof ----检查修复aof文件appendonly file日志文件、数据持久化
+3.redis-check-dump ---检查快照持久化文件
+4.redis-cli ----------命令行客户端
+5.redis-server -------redis服务器启动命令
