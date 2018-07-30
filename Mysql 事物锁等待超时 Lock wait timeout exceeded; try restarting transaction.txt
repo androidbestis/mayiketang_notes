@@ -1,0 +1,51 @@
+				   Mysql事务锁等待超时Lock wait timeout exceeded;try restarting transaction
+========================================================
+问题场景
+ 问题出现环境:
+ 1.在同一事务内先后对同一条数据进行插入和更新操作;
+ 2.多台服务器操作同一数据库;
+ 3.瞬时出现高并发现象;
+
+不断的有以下异常抛出，异常信息:
+org.springframework.dao.CannotAcquireLockException:
+ ### Error updating database.  Cause: java.sql.SQLException: Lock wait timeout exceeded; try restarting transaction### The error may involve com.*.dao.mapper.PhoneFlowMapper.updateByPrimaryKeySelective-Inline### The error occurred while setting parameters### SQL:-----后面为SQL语句及堆栈信息-------- 
+
+========================================================
+原因分析
+ 在高并发的情况下,Spring事务造成数据库死锁,后续操作超时抛出异常。
+ Mysql数据库采用InnoDB模式,默认参数:innodb lockwait_timeout设置锁等待的时间是50s,一旦数据库锁超过这个时间就会报错。
+ 
+========================================================
+解决方案
+1.通过下面的语句查找到未提交事务的数据,kill掉此线程即可。
+  select * from information_schema.innodb_trx
+2.增加锁等待时间,即增大下面配置项参数值,单位为秒(s)
+  innodb_lock_wait_timeout=500
+3.优化存储过程,事务避免过长时间的等待。
+
+========================================================
+参考信息
+1.锁等待超时。是当前事务在等待其它事务释放锁资源造成的。可以找出锁资源竞争的表和语句,优化SQL,创建索引等。如果还是不行,可以适当减少并发线程数。
+2.事务在等待给某个表加锁时超时,估计是表正被另外的进程锁住一直没有释放。可以用show innodb status\G;看一下锁的情况。
+3.搜索解决之道,在管理节点的[ndbd default]区加:
+  TransactionDeadLockDetectionTimeOut=10000（设置 为 10 秒）默认是 1200（1.2 秒）
+4.InnoDB会自动的检测死锁进行回滚,或者终止死锁的情况。
+InnoDB automatically detects transaction deadlocks and rolls back a transaction or transactions to break the deadlock. InnoDB tries to pick small transactions to roll back, where the size of a transaction is determined by the number of rows inserted, updated, or deleted.
+
+如果参数 innodbtablelocks=1 并且 autocommit=0 时，InnoDB 会留意表的死锁，和 MySQL 层面的行级锁。另外，InnoDB 不会检测 MySQL 的 Lock Tables 命令和其他存储引擎死锁。你应该设置 innodblockwait_timeout 来解决这种情况。
+innodblockwait_timeout 是 Innodb 放弃行级锁的超时时间。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
