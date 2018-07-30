@@ -1,0 +1,86 @@
+				ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction
+问题场景:
+执行简单的 update 语句失效，症状如下：
+ provinceid=15 ,cityid= 1667 where orderfrom=10 and orderout_sn='1407261241xxxx'; ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction
+
+1.查看数据库的隔离级别:**
+  mysql>select @@tx_isolation;
+  +-----------------+
+  | @@tx_isolation  |
+  +-----------------+
+  | REPEATABLE-READ |
+  +-----------------+
+  1 row in set (0.00 sec)
+2.查看当前库的线程情况:
+  mysql>show full processlist;
++---- +-----+------------------+-----------+-------+----+--------+---------------------+
+|     |     |                  |           |       |    |        |                     |
+| Id  |User |Host              | db        |Command|Time| State  |Info                 |
+|     |     |                  |           |       |    |        |                     |
++-----+-----+------------------+-----------+-------+-------------+---------------------+
+|3    |	root|localhost:49737   |test       |Sleep  |8	|        |	               |
+|4    |	root|localhost:50008   |test       |Sleep  |8	|        |                     |
+|5    |	root|localhost:50009   |test       |Sleep  |8	|        |	               |
+|6    |	root|localhost:50010   |test       |Sleep  |8	|        |                     |
+|7    |	root|localhost:50011   |test       |Sleep  |8	|        | 	               |
+|10   |	root|192.168.0.23:64191|geaststoken|Query  |0	|starting|show full PROCESSLIST|
+|11   |	root|192.168.0.23:64199|geaststoken|Sleep  |135	|	 |                     |
++-----+-----+------------------+-----------+-------+----+--------+---------------------+
+  没有看到正在执行的慢 SQL 记录线程，再去查看 innodb 的事务表 INNODB_TRX，看下里面是否有正在锁定的事务线程，看看 ID 是否在 show full processlist 里面的 sleep 线程中，如果是，就证明这个 sleep 的线程事务一直没有 commit 或者 rollback 而是卡住了，我们需要手动 kill 掉。
+
+  mysql>select * from information_schema.INNODB_TRX\G;
+            trx_id: 20866
+	    trx_state: LOCK WAIT
+            trx_started: 2014-07-31 10:42:35
+ 	    trx_requested_lock_id: 20866:617:3:3
+            trx_wait_started: 2014-07-30 10:42:35
+            trx_weight: 2
+            trx_mysql_thread_id: 9930577
+            trx_query: delete from dltask where id=1
+            trx_operation_state: starting index read
+            trx_tables_in_use: 1
+            trx_tables_locked: 1
+            trx_lock_structs: 2
+            trx_lock_memory_bytes: 376
+            trx_rows_locked: 1
+            trx_rows_modified: 0
+            trxconcurrencytickets: 0
+            trx_isolation_level: READ COMMITTED
+            trx_unique_checks: 1
+            trx_foreign_key_checks: 1
+            trxlastforeignkeyerror: NULL
+            trxadaptivehash_latched: 0
+            trxadaptivehash_timeout: 10000
+            trx_is_read_only: 0
+            trxautocommitnon_locking: 0
+
+3.看到有这条9930577的sql，kill 掉，执行 kill 9930577;
+  mysql>kill 9930577;
+  Query OK, 0 rows affected (0.00 sec)
+  然后再去查询 INNODB_TRX 表，就没有阻塞的事务 sleep 线程存在了，如下所示：
+  mysql> SELECT * FROM INNODB_TRX\G;
+  Empty set (0.00 sec)
+  ERROR:
+  No query specified
+再去执行 update 语句，就能正常执行了，如下所示：
+  mysql> update orderinfo set provinceid=15 ,city_id= 1667 where orderfrom=10 and orderout_sn=‘1407261241xxxx’;
+  Query OK, 1 row affected (0.00 sec)
+  Rows matched: 1 Changed: 1 Warnings: 0
+
+4.总结分析
+  表数据量也不大,按照普通的情况来说,简单的update应该不会造成阻塞,mysql都是autocommit,不会出现update卡住的情况,去查看下autocommit的值。
+  mysql>select @@autocommit
+  +———--------+
+  | @@autocommit |
+  +————------+
+  | 0            |
+  +————------+
+  1 row in set (0.00 sec)
+看到亮闪闪的 0，这个设置导致原来的 update 语句如果没有 commit 的话，你再重新执行 update 语句，就会等待锁定，当等待时间过长的时候，就会报 ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction 的错误。
+所以赶紧 commit 刚才执行的 update 语句，之后 set global autocommit=1;
+
+
+
+
+
+
