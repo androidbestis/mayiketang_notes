@@ -1,0 +1,68 @@
+						  分布式系统的Raft算法
+===================================================
+一致性算法Raft详解--------数据的一致性同步
+  分布式系统中<一致性算法>非常重要,《paxos一致性算法》流程太过于繁杂实现起来也比较复杂。
+  虽然现在很广泛使用的 Zookeeper 也是基于 Paxos 算法来实现，但是 Zookeeper 使用的 ZAB（Zookeeper Atomic Broadcast）协议对 Paxos 进行了很多的改进与优化，算法复杂我想会是制约他发展的一个重要原因。
+  Paxos 最大的问题就是复杂,Raft 一致性算法就是比 Paxos 简单又能实现 Paxos 所解决的问题的一致性算法。
+
+===================================================
+Raft概述
+ 与Paxos不同Raft强调的是易懂(Understandability),Raft和Paxos一样只要保证n/2+1节点正常就能够提供服务。
+ 众所周知当问题较为复杂时可以把问题分解为几个小问题来处理,Raft也使用了分而治之的思想把算法流程分为三个子问题:
+ 选举(Leader election)、日志复制(Log replication)、安全性(Safety)
+ 
+ Raft的流程:
+   Raft开始时在集群中选举出Leader负责日志的复制的管理,Leader接受来自客户端的事务请求(日志),并将它们复制给集群的其他节点,然后负责通知集群中其他节点提交日志,Leader负责保证其他节点与他的日志同步,当Leader宕掉后集群其他节点会发起选举选出新的Leader。
+
+===================================================
+Raft详解
+  1、角色
+     Raft把集群中的节点分为三种状态:Leader(领导者)、Follower(追随者)、Candidate(候选者),理所当然每种状态负责的任务也是不一样的,Raft运行时提供服务的时候只存在Leader与Follower两种状态。
+     Leader(领导者):负责日志的同步管理,处理来自客户端的请求,与Follower保持着heartbeat的联系；
+     Follower(追随者):刚启动时所有节点为Follower状态,响应Leader的日志同步请求,响应Candidate的请求,把请求到Follower的事务转发给Leader;
+     Candidate(候选者):负责选举投票,Raft刚启动时由一个节点从Follower转为Candidate发起选举,选举出Leader后从Candidate转为Leader状态;
+
+ 2、Term(周期)
+    　在 Raft 中使用了一个可以理解为周期（第几届、任期）的概念，用 Term 作为一个周期，每个 Term 都是一个连续递增的编号，每一轮选举都是一个 Term 周期，在一个 Term 中只能产生一个 Leader。
+      先简单描述下 Term 的变化流程： 
+         Raft开始时所有Follower的Term为1，其中一个 Follower 逻辑时钟到期后转换为 Candidate，Term 加 1 这时 Term 为 2（任期），然后开始选举，这时候有几种情况会使 Term 发生改变：
+　　1：如果当前 Term 为 2 的任期内没有选举出 Leader 或出现异常，则 Term 递增，开始新一任期选举
+　　2：当这轮 Term 为 2 的周期选举出 Leader 后，过后 Leader 宕掉了，然后其他 Follower 转为 Candidate，Term 递增，开始新一任期选举
+　　3：当 Leader 或 Candidate 发现自己的 Term 比别的 Follower 小时 Leader 或 Candidate 将转为 Follower，Term 递增
+　　4：当 Follower 的 Term 比别的 Term 小时 Follower 也将更新 Term 保持与其他 Follower 一致；
+　　可以说每次 Term 的递增都将发生新一轮的选举，Raft 保证一个 Term 只有一个 Leader，在 Raft 正常运转中所有的节点的 Term 都是一致的，如果节点不发生故障一个 Term（任期）会一直保持下去，当某节点收到的请求中 Term 比当前 Term 小时则拒绝该请求；
+ 
+ 3、选举(election)
+    　Raft 的选举由<定时器>来触发，每个节点的选举定时器时间都是不一样的，开始时状态都为 Follower 某个节点定时器触发选举后 Term 递增，状态由 Follower 转为 Candidate，向其他节点发起 RequestVote RPC 请求，这时候有三种可能的情况发生：
+　　1：该 RequestVote 请求接收到 n/2+1（过半数）个节点的投票，从 Candidate 转为 Leader，向其他节点发送 heartBeat 以保持 Leader 的正常运转
+　　2：在此期间如果收到其他节点发送过来的 AppendEntries RPC 请求，如该节点的 Term 大则当前节点转为 Follower，否则保持 Candidate 拒绝该请求
+　　3：Election timeout 发生则 Term 递增，重新发起选举
+　　在一个 Term 期间每个节点只能投票一次，所以当有多个 Candidate 存在时就会出现每个 Candidate 发起的选举都存在接收到的投票数都不过半的问题，这时每个 Candidate 都将 Term 递增、重启定时器并重新发起选举，由于每个节点中定时器的时间都是随机的，所以就不会多次存在有多个 Candidate 同时发起投票的问题。
+　　有这么几种情况会发起选举，1：Raft 初次启动，不存在 Leader，发起选举；2：Leader 宕机或 Follower 没有接收到 Leader 的 heartBeat，发生 election timeout 从而发起选举;
+
+ 4、日志复制(Log Replication)
+    　日志复制（Log Replication）主要作用是用于保证节点的一致性，这阶段所做的操作也是为了保证一致性与高可用性；当 Leader 选举出来后便开始负责客户端的请求，所有事务（更新操作）请求都必须先经过 Leader 处理，这些事务请求或说成命令也就是这里说的日志，我们都知道要保证节点的一致性就要保证每个节点都按顺序执行相同的操作序列，日志复制（Log Replication）就是为了保证执行相同的操作序列所做的工作；在 Raft 中当接收到客户端的日志（事务请求）后先把该日志追加到本地的 Log 中，然后通过 heartbeat 把该 Entry 同步给其他 Follower，Follower 接收到日志后记录日志然后向 Leader 发送 ACK，当 Leader 收到大多数（n/2+1）Follower 的 ACK 信息后将该日志设置为已提交并追加到本地磁盘中，通知客户端并在下个 heartbeat 中 Leader 将通知所有的 Follower 将该日志存储在自己的本地磁盘中。
+
+ 5、安全性（Safety）
+　　安全性是用于保证每个节点都执行相同序列的安全机制，如当某个 Follower 在当前 Leader commit Log 时变得不可用了，稍后可能该 Follower 又会倍选举为 Leader，这时新 Leader 可能会用新的 Log 覆盖先前已 committed 的 Log，这就是导致节点执行不同序列；Safety 就是用于保证选举出来的 Leader 一定包含先前 commited Log 的机制；
+　　选举安全性（Election Safety）
+　　每个 Term 只能选举出一个 Leader
+　　Leader 完整性（Leader Completeness）
+　　这里所说的完整性是指 Leader 日志的完整性，当 Log 在 Term1 被 Commit 后，那么以后 Term2、Term3…等的 Leader 必须包含该 Log；Raft 在选举阶段就使用 Term 的判断用于保证完整性：当请求投票的该 Candidate 的 Term 较大或 Term 相同 Index 更大则投票，否则拒绝该请求；
+
+
+
+
+https://blog.csdn.net/xu__cg/article/details/73555161
+
+
+
+
+
+
+
+
+
+
+
+
