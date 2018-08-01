@@ -1,0 +1,5 @@
+						       高可用、高并发系统设计原则
+http://bbs.itmayiedu.com/article/1528784086012
+
+https://www.cnblogs.com/zhudongchang/p/6826602.html
+  
