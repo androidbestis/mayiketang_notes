@@ -1,0 +1,99 @@
+						  java 垃圾回收串行、并行、并发算法
+
+一.串行
+  1.jdk1.5前的默认算法
+  2.缺点是只有一个线程,执行垃圾回收时程序停止的时间比较大
+  3.语法
+   ①.-XX:+UseSerialGC
+   ②.新生代、老年代使用串行回收
+   ③.新生代复制算法
+   ④.老年代标记-压缩
+  4.示例图
+  5.测试代码
+   //-Xmx20m -Xms20m -Xmn2m -XX:+UseSerialGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps
+      byte[] b = null;
+      for(int i=0;i<7;i++)
+      {
+         b=new byte[3*1024*1024];
+      }
+    串行的关键字是DefNew(年轻代)、Tenured(老年代)、Perm(永久代)
+    0.162: [GC0.162: [DefNew: 1562K->191K(1856K), 0.0030044 secs]
+    0.165: [Tenured: 15917K->3820K(18432K), 0.0059132 secs] 16922K->3820K(20288K), 
+    [Perm : 2890K->2890K(21248K)], 0.0090042 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+
+二.并行
+   1.多个线程执行垃圾回收
+   2.适合于吞吐量的系统,回收时系统会停止运行
+   3.语法
+     ①.-XX:+UseParNewGC（新生代使用并行收集器,老年代使用串行回收收集器   关键字(ParNew)）
+     ②.-XX:+UseParallelGC(新生代使用并行回收收集器,老年代使用串行收集器)
+     ③.-XX:+UseParallelOldGC(新生代,老年代都使用并行回收收集器  关键字(PSYoungGen))
+     ④.-XX:+UseConcMarkSweepGC(新生代使用并行收集器,老年代使用CMS)
+     ⑤.-XX:ParallelGCThreads 限制并行线程数量
+     ⑥.-XX:MaxGCPauseMills GC最大停顿毫秒数
+     ⑦.-XX:GCTimeRatio 垃圾回收占用的CPU时间比例,默认 99 代表最大运行 1% 时间做 GC
+     ⑧.新生代复制算法
+     ⑨.老年代标记-压缩
+   4.示例图
+
+   UseParNewGC 代码同串行，年轻代并行，年老代串行 
+   -Xmx20m -Xms20m -Xmn2m -XX:+UseParNewGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps
+     0.193: [GC0.193: [ParNew: 1601K->192K(1856K), 0.0093101 secs]0.202: [Tenured: 15948K->3834K(18432K), 0.0060758 secs] 16961K->3834K(20288K), [Perm : 3144K->3144K(21248K)], 0.0154452 secs] [Times: user=0.01 sys=0.00, real=0.02 secs] 
+UseParallelGC 功能同UseParNewGC 
+UseParallelOldGC 代码同串行，年轻代、年老代都并行 
+0.141: [GC [PSYoungGen: 1024K->488K(1536K)] 1024K->624K(19968K), 0.0166419 secs] [Times: user=0.03 sys=0.00, real=0.02 secs] 
+0.212: [GC [PSYoungGen: 1012K->504K(1536K)] 16509K->16157K(19968K), 0.0019856 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+0.215: [GC [PSYoungGen: 504K->504K(1536K)] 16157K->16181K(19968K), 0.0029741 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+0.218: [Full GC [PSYoungGen: 504K->0K(1536K)] [ParOldGen: 15677K->3810K(18432K)] 16181K->3810K(19968K) [PSPermGen: 2891K->2890K(21504K)], 0.0133807 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+
+
+三.并发
+  1.系统和垃圾回收一起执行,系统不会暂停
+  2.适合于响应要求高的系统,回收时系统不会停止运行
+  3.语法
+   ①.-XX:+UseConcMarkSweepGC（设置年老代为并发收集，年轻代并行，适合于响应要求高的系统）
+ 
+0.206: [GC0.206: [ParNew: 1603K->192K(1856K), 0.0038214 secs]0.210: [CMS: 15945K->3836K(18432K), 0.0084133 secs] 16963K->3836K(20288K), [CMS Perm : 3120K->3119K(21248K)], 0.0123102 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]
+
+Pid is:8008
+
+标记-清除算法
+2.217: [GC [1 CMS-initial-mark: 9980K(18432K)] 10450K(20288K), 0.0005452 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]
+
+2.225: [CMS-concurrent-mark-start]
+
+2.239: [CMS-concurrent-mark: 0.014/0.014 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]
+
+2.239: [CMS-concurrent-preclean-start]
+
+2.240: [CMS-concurrent-preclean: 0.001/0.001 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]
+
+2.240: [GC[YG occupancy: 469 K (1856 K)]2.240: [Rescan (parallel) , 0.0002922 secs]2.241: [weak refs processing, 0.0000111 secs]2.241: [scrub string table, 0.0001527 secs] [1 CMS-remark: 9980K(18432K)] 10450K(20288K), 0.0005009 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]
+
+2.241: [CMS-concurrent-sweep-start]
+
+2.241: [CMS-concurrent-sweep: 0.000/0.000 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]
+
+2.241: [CMS-concurrent-reset-start]
+
+2.241: [CMS-concurrent-reset: 0.000/0.000 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]
+
+
+
+https://www.cnblogs.com/gossip/p/6100769.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
