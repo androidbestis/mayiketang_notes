@@ -1,0 +1,33 @@
+							Java @Retention 注解【描述注解的生命周期】
+@Retention定义了该Annotation被保留的时间长短:
+  某些 Annotation 仅出现在源代码中，而被编译器丢弃；
+  而另一些却被编译在 class 文件中；
+  编译在 class 文件中的 Annotation 可能会被虚拟机忽略，而另一些在 class 被装载时将被读取（请注意并不影响 class 的执行，因为 Annotation 与 class 在使用上是被分离的）。使用这个 meta-Annotation 可以对 Annotation 的“生命周期”限制。
+
+作用:表示需要在什么级别保存该注释信息,用于描述注解的生命周期(即:被描述的注解在什么范围内有效)
+ Retention(保留)注解说明, 这种类型的注解会被保留到那个阶段. 有三个值:
+  ①.RetentionPolicy.SOURCE -----这种类型的Annotations只在源代码级别保留,编译时就会被忽略
+  ②.RetentionPolicy.CLASS-------这种类型的Annotations编译时被保留,在class文件中存在,但JVM将会忽略
+  ③.RetentionPolicy.RUNTIME-----这种类型的Annotations将被JVM保留,所以他们能在运行时被JVM或其他使用反射机制的代码所读取和使用。
+
+@Retention的用法:
+ 指示注释类型的注释要保留多久。如果注释类型声明中不存在Retention注释,则保留策略默认为RetentionPolicy.CLASS,例如:
+1.  @Retention(RetentionPolicy.CLASS)     
+2.  public @interface MyAnnotation {     
+3.      ...      
+4.  }  
+5.    
+6.  @Retention(RetentionPolicy.CLASS)    
+7.  public @interface MyAnnotation {    
+8.      ...     
+9.  }   
+1.     /** 
+2.      * @ClassName：Test_Retention 
+3.      * @Description：在这个示例中, @Retention(RetentionPolicy.RUNTIME)注解 
+4.      * 表明 Test_Retention注解将会由虚拟机保留,以便它可以在运行时通过反射读取. 
+5.      */  
+6.      @Retention(RetentionPolicy.RUNTIME)  
+7.      public @interface Test_Retention {  
+8.         String doTestRetention();  
+9.      }
+ 
