@@ -1,0 +1,51 @@
+						springboot + profile（不同环境读取不同配置）
+.不同环境的配置设置一个配置文件,例如:dev环境下的配置配置在application-dev.properties 中;prod 环境下的配置配置在 application-prod.properties 中。
+.在application.properties中指定使用哪一个文件
+
+1、application-dev.properties(dev 环境下的配置)
+  profile = dev_envrimont
+
+2、application-prod.properties（prod 环境下的配置）
+  profile = prod_envrimont
+
+3、application.properties
+   spring.data.mongodb.uri=mongodb://192.168.22.110:27017/myfirstMongodb
+   #spring.profiles.active 
+    spring.profiles.active=dev
+
+说明：上边的配置表示使用 dev 环境下的配置。
+
+4、Controller
+  @Autowired  private Environment env;
+        
+  @RequestMapping("/testProfile") 
+  public String testProfile(){
+    return env.getProperty("profile");
+}
+
+测试：
+上述代码执行后的结果是：dev_envrimont 和 mongodb://192.168.22.110:27017/myfirstMongodb
+如果 application.properties 的配置改为：spring.profiles.active=prod，则结果是：prod_envrimont
+如果 application.properties 的配置改为：spring.profiles.active=prod，而 application.properties 中也配置了 profile=xxx（不管该配置配置在 spring.profiles.active=prod 的上方还是下方），这个时候结果是：prod_envrimont
+如果 application.properties 的配置改为：spring.profiles.active=prod，而 application.properties 中也配置了 profile=xxx（不管该配置配置在 spring.profiles.active=prod 的上方还是下方），但是 application-prod.properties 删掉了 profile = prod_envrimont，这个时候结果是：xxx
+结论：
+
+各个环境公共的配置写在 application.properties 中
+各个模块独有的配置配置在自己的 application-{xxx}.properties 文件中
+程序读取的时候优先读取 application.properties 中选中的 profile 的配置，若读不到才会从 application.properties 去读
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

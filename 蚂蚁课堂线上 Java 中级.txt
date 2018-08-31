@@ -1,0 +1,174 @@
+一、JavaSE:
+ 多线程与并发编程
+ 多线程创建、常见 api、多线程之间分批处理、线程安全、线程之间实现同步(synchronized)、Lock 锁、多线程之间通讯(wait、notifyLock、Java 内存模型、Volatile、ThradLock、线程池、常见 JDK1.5 并发包
+
+数据交换格式与 SpringIOC 底层实现
+xml、json、html、java 反射集成、实现案例 SpringIOC 底层实现
+
+自定义注解与常用设计模式
+内置注解、自定注解、使用注解实现 orm 框架映射实体类原理、常见设计模式:单利、代理、观察者、模版方法、策略模等。
+
+网络通讯技术
+socket、mina、netty、nio
+
+二、JavaEE 基础
+servle、jsp、freemarker、velocity 、session、自定义 session、cookie、过滤器、监听器、maven 私服。
+
+深入理解 Http 协议
+http 协议请求方式、结构、https、如何实现防盗链、防止抓包分析、防止 DDOC、httpclient、完成模拟 12306 抢火车票案例。
+
+JavaEE 常用框架
+Spring 事物、Spring 传播行为、mybatis、springboot(微服务)、springCloud（微服务）、 Quartz（定时任务）
+
+三、互联网新技术
+jms、activityMQ、Redis、lvs、nginx、zookeeper 、cdn 急速、keepalive、dubbo、dubbo 源码分析、RIM、webService
+
+四、分布式实战演练
+分布式锁解决方案、分布式事物解决方案、高并发解方案(负载均衡、集群、高可用)、session 共享解决方案、网站跨域解决方案、大型网关 API 接口搭建、大型互联公司分布式 JOB 解决方案
+
+五、底层技术
+JVM 参数调优、常用框架(集合)源码分析
+
+Web 安全与反攻
+对称加密、非对称加密、加签、加盐、简单实现防止 DDOC、XSS、CSRF
+
+第三方支付技术
+银联支付、支付宝、微信支付
+
+优化
+mysql 优化、tomcat 优化
+
+
+六、设计架构知识
+动静分离、缓存更新、服务降级、限流、CDN 加速。
+订单可靠性保证：避免重复订单、避免漏单、要能够有补单功能
+缓存设计、缓存击穿、缓存雪崩的出现场景以及解决方案
+mongodb、kafka、zookeeper、分布式调度
+解决大型互联网千万级别访问量，大并发的承受压力、logstash 海量日志采集与传输、HDFS 存储
+
+
+一、JavaSe 基础部分
+①多线程
+1、多线程运行原理；2、多线程的实现方案；3、线程生命周期；4、线程同步；5、线程池。
+②网络编程
+1、网络编程三要素；2、Socket原理机制；3、UDP传输；4、TCP传输
+③反射
+1、类加载机制原理；2、反射构造方法、字段、方法；3、Properties配置文件
+④JSON
+1、什么是json ；2、json与xml区别  ；3、fastjson解析json；3、gson解析json。
+⑤注解及动态代理
+1、定义注解；3、动态代理Proxy；4、类加载器
+⑤JavaSE 面试技巧。
+
+二、JavaWeb
+2.1 JavaWeb 入门知识
+①web 基础知识
+2、Tomcat使用；2、Servlet；3、Request和Response；4、Cookie和Session；5、jsp，el和jstl；6、Filter；7、Listener
+①http 知识
+1、深入理解http协议底层原理、请求头、请求体、请求方式、状态
+案例:http如何防止抓包分析、如何协议如何实现防盗链。
+2.2JavaWeb**中级知识
+①Maven
+1.maven私服Nexus；2.maven jar包管理；3.eclipse整合maven工程；4.pom.xml配置详解；5.maven打包
+①Mybatis
+1、mybatis框架原理；2、mybatis入门案例；3、mybatis开发DAO方式；4、mybatis输入输出映射；5、动态sql；
+②SpringMVC
+1、springmvc框架原理；2、springmvc入门案例；3、springmvc整合mybatis；4、参数绑定；5、json数据交互；6、拦截器
+③Spring
+1、applicationContext、xml配置文件编写；2、IoC思想、DI依赖注入；3、使用AspectJ切面编程；4、JdbcTemplate模板使用；5、声明式事务管理6、SSH整合、7、SSM整合
+④JavaEE 面试技巧
+2.3JavaWeb 高级知识
+④Nosql-Redis
+2、redis：redis原理剖析（一致性哈希）、redis主从模式（一主一从、一主多从）、redis常用命令（set、get、lpush、lrange、hmget、hmset）、redis客户端（jedis、jedispool、jedisCluster、jedisCluster+springMVC整合）、redis持久化（RDB、AOF），memcached：缓存击穿，mongoDB：mongodb原理（面向集合）、动态查询、索引、mongodb客户端Robomongo、mongodb常用命令（db.foo.find()、show dbs;、db.dropDatabase();、db.userInfo.find({age:
+{$gt: 22}})、db.users.save({name: ‘zhangsan’, age: 25, sex: true});、db.users.update({age: 25}, {$set: {name: 'changeName'}}, false, true);、db.users.remove({age: 132});）
+⑤消息中间件activeMQ
+
+JMS规范：点对点模型（消息队列、发送者、接收者）、发布订阅模型（主题、发布者、订阅者），activeMQ：跨平台、支持JMS规范、消息持久化、支持Ajax访问、activeMQ监控、java操作activeMQ实例演练
+⑥session 跨域共享
+
+session跨域出现场景，bboss+mongodb解决session跨域：bboss介绍及整合、sessionconf+mongodb配置详解、session监控
+⑦SpringBoot+Jta+Atomikos 分布式事务解决
+
+使用SpringBoot框架简化xml配置、Spring整合mybatis、jta、Atomikos搭建分布式事物解决方案
+⑧dubbo+Zookeeper 框架
+
+Zookeeper：Zookeeper基本原理（数据模型，重要概念：ZNode、Session、Watcher，Zookeeper特性：读、写(更新)模式、WAL和Snapshot、FIFO、Linearizability）、ZooKeeper Client API：create(path, data,
+flags)、delete(path, version)、exists(path, watch)、getData(path,
+watch)、ZooKeeper典型应用场景：数据发布与订阅（配置中心）、负载均衡、命名服务，锁：本地锁、数据库锁、分布式锁、秒杀实现、dubbo是什么？、dubbo能做什么？、dubbo架构、dubbo+springMVC使用详解
+
+重点面试:分布式锁、分布式事物解决方案。
+⑨分布式接口技术
+
+webService：soap协议、wsdl、webService框架（AXIS2、CXF），RMI：RMI调用原理、RMI远程调用实战、RMI缺点,HttpClient、Urlconnection.
+⑩Web 服务器架构
+
+Tomcat：Tomcat配置详解（web.xml、server.xml、context.xml）、Tomcat批处理文件详解（startup.bat、catalina.bat、setclasspath.bat）、Tomcat日志（catalina.log），Nginx：Nginx模块工作原理（Handlers（处理器模块）、Filters （过滤器模块）、Proxies （代理类模块））、Nginx进程模型（master进程、worker进程）、Nginx配置详解（负载均衡配置、动静分离配置、其他配置），Nginx+keepalived+apache+Tomcat架构实战：Nginx+Tomcat单台部署、Nginx+apache+Tomcat集群部署、Nginx+keepalived实现Nginx双机热备
+?持久层高并发架构
+
+数据库水平切分技巧：分库及DB路由（单点集群（Group）、负载均衡策略（LB）、读写分离）、分表（分表规则、分表增删改查）、MySQL集群实战
+2.3JavaEE项目实战
+
+①微信运营平台（入门）
+
+** 项目介绍：**
+
+ 主要做管理对每个“微信管理人员”添加的微信公众号相关信息也就是(AppID和Appsecret)进行微信公众号信息管理。
+
+ 管理人员可以在后端项目中，发布菜单、推送消息、发布素材、客服消息、粉丝同步、微点点机器人等。（类似微信自助研发的“微信公众号管理系统”）
+
+ 微微点机器人也就是，用户关注"微点点"微信公众号，输入对应的关键字，可以实现查询对应查询关键字匹配业务信息。例如用输入“地区+天气”，可以查询到对应地方天气预报信息，输入“新闻”可以查询到的新闻动态等
+
+项目采用分布式架构、对业务进行拆分。
+
+ ①微信接口项目  （部署多台服务器）
+
+ ②微信公众管理平台项目(一台服务器)
+
+** 使用技术:**
+
+ 使用SpringMVC+Mybatis+Spring+Maven+Quartz整合
+
+ 使用缓存Redis作为缓存减轻数据库压力
+
+ 使用nginx+tomcat实现负载均衡实现对单台服务器压力
+
+ 使用zookeeper的锁机制和dubbo的注册式服务
+
+ 使用httpclient技术调用第三方接口
+
+ 使用ngrok工具最有外网映射工具
+
+ 使用富文本作为编辑器
+
+ 前端使用easyui+jquery
+
+ 发布环境：linux
+
+ 使用Java定时JOB框架-Quartz实现任务调度，调用微信接口，对每个微信公众号相关信息进行刷新AccessToken。  项目架构才用动静分离技术，将每个微信接口（菜单接口、客服接口、素材接口、消息接口）使用Restful规范返回JSON格式进行封装给客户端。
+
+ 微点点机器人，使用Java Httpclient技术调用第三方接口，实现对应关键字匹配业务。
+②高仿链家租房（重点）
+
+**项目介绍：**
+
+该项目为高仿链家租房网站，经纪人发布租房信息，用户查询租房信息，支持列表和地图查询房屋信息。房屋信息包括周边信息、联系经纪人、相似房源等。
+
+使用技术:
+
+**后端技术:**
+
+项目采用微服务架构、分模块开发，前后端隔离，数据库用垂直拆分。
+
+使用maven多模块构建，使用springboot简化xml配置，springboot整合mybatis
+
+sql监控(sql中异常, 返回行过多等)
+
+使用jta+atomikos进行分布式事物管理，介绍企业真实中，工具类封装ThreadPoll（线程池）、BaseControler、BaseSercice、BaseDao、SpringContextUtil、HttpClientUtils、LogAspectController(AO日志封装)、AdviceController（全局补货异常）、RedisUtils、XssUtils（脚本注入）等封装。
+
+项目之间通讯采用dubbo+zookeeper进行服务化管理。
+
+使用高德地图sdk进行地图查找房屋信息。
+
+使用redis作为缓存、fastjson解析json框架、activeMQ异步推送
+
+使用lombok简化Java代码
