@@ -1,0 +1,86 @@
+						 解决 @ResponseBody 注解返回中文乱码
+一、@RequestMapping的produces方法
+    第一种解决方案使用:@RequestMapping注解的produces方法。写法如下:
+     1、@RequestMapping(value="testPersonalValidtor.do",produces="application/json;charset=utf-8")
+       在方法上加上这个注解就可以了。但是这样写的话有限制，只能在特定的方法上面使用。如果需要全局都使用的话，需要修改 SpringMVC 的配置文件。
+
+二、使用messageConverters
+    第二种解决方案使用:HttpMessageConverter接口的相关实现类。配置文件中的配置信息
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" >  
+      <property name="messageConverters">  
+        <list>  
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />  
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">  
+                <property name="supportedMediaTypes">  
+                    <list>  
+                        <value>text/plain;charset=utf-8</value>  
+                        <value>text/html;charset=UTF-8</value>  
+                    </list>  
+                </property>  
+            </bean>  
+        </list>  
+      </property>  
+    </bean>  
+
+注意：一定要放到最上面，否则不会生效。
+并且需要在 Maven 依赖中配置上 Jackjson 的依赖。
+<dependency>  
+    <groupId>org.codehaus.jackson</groupId>  
+    <artifactId>jackson-mapper-asl</artifactId>  
+    <version>1.9.13</version>  
+</dependency>  
+<dependency>  
+    <groupId>org.codehaus.jackson</groupId>  
+    <artifactId>jackson-core-asl</artifactId>  
+    <version>1.9.13</version>  
+</dependency>  
+
+三、SpringMVC的配置文件中加入配置,具体配置内容如下:
+<!-- SpringMVC注解驱动 -->  
+<mvc:annotation-driven>  
+    <mvc:message-converters>  
+        <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"/>  
+        <bean class="org.springframework.http.converter.StringHttpMessageConverter">  
+            <property name="supportedMediaTypes">  
+                <list>  
+                    <value>text/plain;charset=utf-8</value>  
+                    <value>text/html;charset=UTF-8</value>  
+                </list>  
+            </property>  
+        </bean>  
+    </mvc:message-converters>  
+</mvc:annotation-driven>  
+注意：始用这种配置的时候，需要去掉 RequestMappingHandlerMapping、RequestMappingHandlerAdapter 或者 DefaultAnnotationHandlerMapping、AnnotationMethodHandlerAdapter 的 Bean 配置，要不然可能会不生效。
+
+另外：对于请求映射处理类返回类型可以是 String 也可以是 Object（如果 Object 是 JavaBean 的话，SpringMVC 会用 Jackson 来转换成 json 字符串）.例子如下：
+  @RequestMapping(value = "testPersonalValidtor.do")  
+  @ResponseBody  
+  //直接返回对象  
+  public Object testPersonalValidtor(@Valid PersonScope personScope, BindingResult bindingResult){  
+      if(bindingResult.hasErrors()){  
+          StringBuffer sb = new StringBuffer();  
+          for(ObjectError objectError : bindingResult.getAllErrors()){  
+              sb.append(((FieldError)objectError).getField() +" : ").append(objectError.getDefaultMessage());  
+          }  
+          return sb.toString();  
+      }else{  
+          return personScope;  
+      }  
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
