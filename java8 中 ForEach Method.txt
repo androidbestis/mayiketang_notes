@@ -1,0 +1,20 @@
+					             Java8中ForEach Method
+在 jdk1.7 之前，我们去遍历一个 List 集合中的元素，我们可以这么做：
+List values = Arrays.asList(4,2,3);
+    for (int i = 0; i < values.size(); i++){
+        System.out.println(values.get(i));
+    }
+
+or 用一个增强的 forEach 循环：
+for (int i: values) {
+    System.out.println(i);
+}
+
+结果都是 OK 的，但是这种写法的效率其实会比较慢，这里提出一个概念叫做 external loops ，以上的两种写法都是属于 external loops。这个怎么理解呢，这样想，因为以上的两个 loop 在 List 的外面，就是说从 List 的外面去 fetch 这些 element，就像你有一个装有 elements 的 box , 你把手伸进这个 box，然后再去 fetch 这些 element 的意思。所以叫它 external loops .
+
+但是在 jdk1.8 里有一个 Internal loops 可以替代 上面的 External loops ，它是这样的：
+
+List values = Arrays.asList(4,2,3);
+values.forEach(i -> System.out.println(i));
+ // "->" 是一个 lambda expression,后面再说
+可以这么理解， 这里的 forEach 是 List 的一部分，使用这个 API ，要比 external loops 要快很多，相当于直接在 box 里面去 fetch 这些 elements 。如果是在处理 huge data 的时候，就会表现出来。这是 jdk 1.8 的新特性。

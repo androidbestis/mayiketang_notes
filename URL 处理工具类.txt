@@ -1,0 +1,65 @@
+						        URL 处理工具类
+1.  import java.io.UnsupportedEncodingException;  
+2.  import java.net.URLDecoder;  
+3.  import java.net.URLEncoder;  
+4.  import java.util.Map;  
+5.  import java.util.concurrent.ConcurrentHashMap;  
+6.    
+7.    
+8.  /** 
+9.   * URL处理工具类 
+10.   * 
+11.   */  
+12.  public final class URLUtil {  
+13.        
+14.      /** 
+15.       * 和javascript中的encodeURIComponent方法效果相同 
+16.       * 
+17.       * @param component 
+18.       * @return 
+19.       */  
+20.      public static String encodeURIComponent(String component) {  
+21.          String result = null;  
+22.    
+23.          try {  
+24.              result = URLEncoder.encode(component, "UTF-8")  
+25.                      .replaceAll("\\%28", "(")  
+26.                      .replaceAll("\\%29", ")")  
+27.                      .replaceAll("\\+", "+")  
+28.                      .replaceAll("\\%27", "'")  
+29.                      .replaceAll("\\%21", "!")  
+30.                      .replaceAll("\\%7E", "~");  
+31.          } catch (UnsupportedEncodingException e) {  
+32.              result = component;  
+33.          }  
+34.    
+35.          return result;  
+36.      }  
+37.        
+38.      /** 
+39.       * 将URL中的查询参数部分解析成键值对 
+40.       * 
+41.       * @param queryString URL中的查询参数部分，不含前缀'?' 
+42.       * @return 
+43.       */  
+44.      public static Map splitQuery(String queryString) {  
+45.          final Map query_pairs = new ConcurrentHashMap();  
+46.          final String[] pairs = queryString.split("&");  
+47.          for (String pair : pairs) {  
+48.              final int idx = pair.indexOf("=");  
+49.              String key;  
+50.              try {  
+51.                  key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;  
+52.                  final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1),  
+53.                                                                                              "UTF-8") : null;  
+54.                  if (!key.isEmpty()) {  
+55.                      query_pairs.put(key, value);  
+56.                  }  
+57.              } catch (UnsupportedEncodingException e) {  
+58.                  e.printStackTrace();  
+59.              }  
+60.          }  
+61.          return query_pairs;  
+62.      }  
+63.    
+64.  }
