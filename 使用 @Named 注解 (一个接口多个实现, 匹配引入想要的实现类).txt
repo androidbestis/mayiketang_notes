@@ -1,0 +1,69 @@
+					使用 @Named 注解 (一个接口多个实现, 匹配引入想要的实现类)
+@Inject注解
+@Named注解
+
+若一个接口 DemoInterface，有多个(最少 2 个)实现类(ADemoImpl,BDemoImpl…. )
+
+
+在引用类中使用 @Inject 注解时，要在类级别上使用相关的限定符进行注解，同时在注入 DemoInterface 的类中要有一个字段使用相同的限定符进行注解。
+ 如下:
+   @Inject @ADemoImpl
+   private DemoInterface demoService;
+
+使用@Named注解(解决匹配引入一个接口多个实现):
+
+	/**
+	* @ClassName：DemoService
+	* @Description：接口
+	* @date：2017年7月12日
+	* 修改备注：
+	*/
+	public interface DemoService{
+		public void demoTest();
+	}
+	
+	/**
+	* @ClassName：DemoService_A_impl
+	* @Description：实现类A
+	* @date：2017年7月12日
+	* 修改备注：
+	*/
+	@Named("demoService_A_impl")
+	public class DemoService_A_impl implements DemoService{
+		@Override
+		public void demoTest(){
+			//here codes
+		}
+	}
+	
+	/**
+	* @ClassName：DemoService_B_impl
+	* @Description：实现类B
+	* @date：2017年7月12日
+	* 修改备注：
+	*/
+	@Named("demoService_B_impl")
+	public class DemoService_B_impl implements DemoService{
+		@Override
+		public void demoTest(){
+			//codes here----codes here
+		}
+	}
+	
+	/**
+	* @ClassName：UseDemo
+	* @Description：使用类，注入接口类
+	* @date：2017年7月12日
+	* 修改备注：
+	*/
+	public class UseDemo{
+		
+		@Inject
+		@Named("demoService_B_impl")   //指定注入实现类B
+		private DemoService demoService;
+		
+		public void doSomething(){
+			demoService.demoTest();    //在此处调用的是实现类B的实现方法
+		}
+		
+	}
