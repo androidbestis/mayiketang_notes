@@ -1,0 +1,484 @@
+					Spring boot+jta+atomikos 分布式事务管理
+
+Spring boot + jta + atomikos 分布式事务管理
+
+1.在application.properties文件中加入多个数据源配置
+# Profiles
+spring.profiles.active = dev
+#spring.profiles.active = pro
+
+# Server
+server.port = 8888
+server.context-path = 
+
+# Mysql 1
+mysql.datasource.test.url =test?useUnicode=true&characterEncoding=UTF-8
+mysql.datasource.test.username = test
+mysql.datasource.test.password = test
+
+mysql.datasource.test.minPoolSize = 3
+mysql.datasource.test.maxPoolSize = 25
+mysql.datasource.test.maxLifetime = 20000
+mysql.datasource.test.borrowConnectionTimeout = 30
+mysql.datasource.test.loginTimeout = 30
+mysql.datasource.test.maintenanceInterval = 60
+mysql.datasource.test.maxIdleTime = 60
+mysql.datasource.test.testQuery = select 1
+
+
+# Mysql 2
+mysql.datasource.test2.url =test?useUnicode=true&characterEncoding=UTF-8
+mysql.datasource.test2.username =test
+mysql.datasource.test2.password =test
+
+mysql.datasource.test2.minPoolSize = 3
+mysql.datasource.test2.maxPoolSize = 25
+mysql.datasource.test2.maxLifetime = 20000
+mysql.datasource.test2.borrowConnectionTimeout = 30
+mysql.datasource.test2.loginTimeout = 30
+mysql.datasource.test2.maintenanceInterval = 60
+mysql.datasource.test2.maxIdleTime = 60
+mysql.datasource.test2.testQuery = select 1
+
+2.建立多个数据源 db1
+package cn.forever.demo.config;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+import cn.forever.demo.datasource.TestDBConfig;
+
+@Configuration
+// basePackages 最好分开配置 如果放在同一个文件夹可能会报错
+@MapperScan(basePackages = "cn.forever.demo.dao.test1", sqlSessionTemplateRef = "testSqlSessionTemplate")
+public class TestMyBatisConfig {
+
+	// 配置数据源
+	@Primary
+	@Bean(name = "testDataSource")
+	public DataSource testDataSource(TestDBConfig testConfig) throws SQLException {
+		MysqlXADataSource mysqlXaDataSource = new MysqlXADataSource();
+		mysqlXaDataSource.setUrl(testConfig.getUrl());
+		mysqlXaDataSource.setPinGlobalTxToPhysicalConnection(true);
+		mysqlXaDataSource.setPassword(testConfig.getPassword());
+		mysqlXaDataSource.setUser(testConfig.getUsername());
+		mysqlXaDataSource.setPinGlobalTxToPhysicalConnection(true);
+
+		AtomikosDataSourceBean xaDataSource = new AtomikosDataSourceBean();
+		xaDataSource.setXaDataSource(mysqlXaDataSource);
+		xaDataSource.setUniqueResourceName("testDataSource");
+
+		xaDataSource.setMinPoolSize(testConfig.getMinPoolSize());
+		xaDataSource.setMaxPoolSize(testConfig.getMaxPoolSize());
+		xaDataSource.setMaxLifetime(testConfig.getMaxLifetime());
+		xaDataSource.setBorrowConnectionTimeout(testConfig.getBorrowConnectionTimeout());
+		xaDataSource.setLoginTimeout(testConfig.getLoginTimeout());
+		xaDataSource.setMaintenanceInterval(testConfig.getMaintenanceInterval());
+		xaDataSource.setMaxIdleTime(testConfig.getMaxIdleTime());
+		xaDataSource.setTestQuery(testConfig.getTestQuery());
+		return xaDataSource;
+	}
+
+	@Bean(name = "testSqlSessionFactory")
+	public SqlSessionFactory testSqlSessionFactory(@Qualifier("testDataSource") DataSource dataSource)
+			throws Exception {
+		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+		bean.setDataSource(dataSource);
+		bean.setMapperLocations(
+				new PathMatchingResourcePatternResolver().getResources("classpath:/mybatis/test1/*.xml"));
+		return bean.getObject();
+	}
+
+	@Bean(name = "testSqlSessionTemplate")
+	public SqlSessionTemplate testSqlSessionTemplate(
+			@Qualifier("testSqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
+		return new SqlSessionTemplate(sqlSessionFactory);
+	}
+}
+
+3.建立多个数据源 db2
+package cn.forever.demo.config;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+import cn.forever.demo.datasource.Test2DBConfig;
+
+@Configuration
+@MapperScan(basePackages = "cn.forever.demo.dao.test2", sqlSessionTemplateRef = "test2SqlSessionTemplate")
+public class Test2MyBatisConfig {
+	
+	@Bean(name = "test2DataSource")
+	public DataSource test2DataSource(Test2DBConfig test2Config) throws SQLException {
+		MysqlXADataSource mysqlXaDataSource = new MysqlXADataSource();
+		mysqlXaDataSource.setUrl(test2Config.getUrl());
+		mysqlXaDataSource.setPinGlobalTxToPhysicalConnection(true);
+		mysqlXaDataSource.setPassword(test2Config.getPassword());
+		mysqlXaDataSource.setUser(test2Config.getUsername());
+		mysqlXaDataSource.setPinGlobalTxToPhysicalConnection(true);
+
+		AtomikosDataSourceBean xaDataSource = new AtomikosDataSourceBean();
+		xaDataSource.setXaDataSource(mysqlXaDataSource);
+		xaDataSource.setUniqueResourceName("test2DataSource");
+
+		xaDataSource.setMinPoolSize(test2Config.getMinPoolSize());
+		xaDataSource.setMaxPoolSize(test2Config.getMaxPoolSize());
+		xaDataSource.setMaxLifetime(test2Config.getMaxLifetime());
+		xaDataSource.setBorrowConnectionTimeout(test2Config.getBorrowConnectionTimeout());
+		xaDataSource.setLoginTimeout(test2Config.getLoginTimeout());
+		xaDataSource.setMaintenanceInterval(test2Config.getMaintenanceInterval());
+		xaDataSource.setMaxIdleTime(test2Config.getMaxIdleTime());
+		xaDataSource.setTestQuery(test2Config.getTestQuery());
+		return xaDataSource;
+	}
+
+	@Bean(name = "test2SqlSessionFactory")
+	public SqlSessionFactory testSqlSessionFactory(@Qualifier("test2DataSource") DataSource dataSource)
+			throws Exception {
+		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+		bean.setDataSource(dataSource);
+		bean.setMapperLocations(
+				new PathMatchingResourcePatternResolver().getResources("classpath:/mybatis/test2/*.xml"));
+		return bean.getObject();
+	}
+
+	@Bean(name = "test2SqlSessionTemplate")
+	public SqlSessionTemplate testSqlSessionTemplate(
+			@Qualifier("test2SqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
+		return new SqlSessionTemplate(sqlSessionFactory);
+	}
+}
+
+4.新增配置文件读取 db1
+package cn.forever.demo.datasource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "mysql.datasource.test")
+public class TestDBConfig {
+
+	private String url;
+	private String username;
+	private String password;
+
+	/ min-pool-size 最小连接数 /
+	private int minPoolSize;
+	/ max-pool-size 最大连接数 /
+	private int maxPoolSize;
+	/ max-lifetime 连接最大存活时间 /
+	private int maxLifetime;
+	/ borrow-connection-timeout 获取连接失败重新获等待最大时间，在这个时间内如果有可用连接，将返回 /
+	private int borrowConnectionTimeout;
+	/ login-timeout java数据库连接池，最大可等待获取datasouce的时间 /
+	private int loginTimeout;
+	/ maintenance-interval 连接回收时间 /
+	private int maintenanceInterval;
+	/ max-idle-time 最大闲置时间，超过最小连接池连接的连接将将关闭 /
+	private int maxIdleTime;
+	/ test-query 测试SQL /
+	private String testQuery;
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public int getMinPoolSize() {
+		return minPoolSize;
+	}
+
+	public void setMinPoolSize(int minPoolSize) {
+		this.minPoolSize = minPoolSize;
+	}
+
+	public int getMaxPoolSize() {
+		return maxPoolSize;
+	}
+
+	public void setMaxPoolSize(int maxPoolSize) {
+		this.maxPoolSize = maxPoolSize;
+	}
+
+	public int getMaxLifetime() {
+		return maxLifetime;
+	}
+
+	public void setMaxLifetime(int maxLifetime) {
+		this.maxLifetime = maxLifetime;
+	}
+
+	public int getBorrowConnectionTimeout() {
+		return borrowConnectionTimeout;
+	}
+
+	public void setBorrowConnectionTimeout(int borrowConnectionTimeout) {
+		this.borrowConnectionTimeout = borrowConnectionTimeout;
+	}
+
+	public int getLoginTimeout() {
+		return loginTimeout;
+	}
+
+	public void setLoginTimeout(int loginTimeout) {
+		this.loginTimeout = loginTimeout;
+	}
+
+	public int getMaintenanceInterval() {
+		return maintenanceInterval;
+	}
+
+	public void setMaintenanceInterval(int maintenanceInterval) {
+		this.maintenanceInterval = maintenanceInterval;
+	}
+
+	public int getMaxIdleTime() {
+		return maxIdleTime;
+	}
+
+	public void setMaxIdleTime(int maxIdleTime) {
+		this.maxIdleTime = maxIdleTime;
+	}
+
+	public String getTestQuery() {
+		return testQuery;
+	}
+
+	public void setTestQuery(String testQuery) {
+		this.testQuery = testQuery;
+	}
+
+}
+
+5.新增配置文件读取 db2
+package cn.forever.demo.datasource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "mysql.datasource.test2")
+public class Test2DBConfig {
+
+	private String url;
+	private String username;
+	private String password;
+
+	/ min-pool-size 最小连接数 /
+	private int minPoolSize;
+	/ max-pool-size 最大连接数 /
+	private int maxPoolSize;
+	/ max-lifetime 连接最大存活时间 /
+	private int maxLifetime;
+	/ borrow-connection-timeout 获取连接失败重新获等待最大时间，在这个时间内如果有可用连接，将返回 /
+	private int borrowConnectionTimeout;
+	/ login-timeout java数据库连接池，最大可等待获取datasouce的时间 /
+	private int loginTimeout;
+	/ maintenance-interval 连接回收时间 /
+	private int maintenanceInterval;
+	/ max-idle-time 最大闲置时间，超过最小连接池连接的连接将将关闭 /
+	private int maxIdleTime;
+	/ test-query 测试SQL /
+	private String testQuery;
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public int getMinPoolSize() {
+		return minPoolSize;
+	}
+
+	public void setMinPoolSize(int minPoolSize) {
+		this.minPoolSize = minPoolSize;
+	}
+
+	public int getMaxPoolSize() {
+		return maxPoolSize;
+	}
+
+	public void setMaxPoolSize(int maxPoolSize) {
+		this.maxPoolSize = maxPoolSize;
+	}
+
+	public int getMaxLifetime() {
+		return maxLifetime;
+	}
+
+	public void setMaxLifetime(int maxLifetime) {
+		this.maxLifetime = maxLifetime;
+	}
+
+	public int getBorrowConnectionTimeout() {
+		return borrowConnectionTimeout;
+	}
+
+	public void setBorrowConnectionTimeout(int borrowConnectionTimeout) {
+		this.borrowConnectionTimeout = borrowConnectionTimeout;
+	}
+
+	public int getLoginTimeout() {
+		return loginTimeout;
+	}
+
+	public void setLoginTimeout(int loginTimeout) {
+		this.loginTimeout = loginTimeout;
+	}
+
+	public int getMaintenanceInterval() {
+		return maintenanceInterval;
+	}
+
+	public void setMaintenanceInterval(int maintenanceInterval) {
+		this.maintenanceInterval = maintenanceInterval;
+	}
+
+	public int getMaxIdleTime() {
+		return maxIdleTime;
+	}
+
+	public void setMaxIdleTime(int maxIdleTime) {
+		this.maxIdleTime = maxIdleTime;
+	}
+
+	public String getTestQuery() {
+		return testQuery;
+	}
+
+	public void setTestQuery(String testQuery) {
+		this.testQuery = testQuery;
+	}
+
+}
+
+6.TestController
+package cn.forever.demo.controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import cn.forever.demo.service.TestService;
+
+@RestController
+public class TestController {
+
+	@Autowired
+	private TestService testService;
+	
+	@RequestMapping("index")
+	public String index(){
+		testService.save();
+		return "lalalla";
+	}
+}
+
+7.sercice 方法上 加上事物注解 @Transactional
+package cn.forever.demo.service;
+import org.apache.commons.lang3.RandomUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import cn.forever.demo.dao.test1.TestDBDao;
+import cn.forever.demo.dao.test2.TestDB2Dao;
+
+@Service
+public class TestService {
+	int i = 0;
+	@Autowired
+	private TestDBDao test1;
+	@Autowired
+	private TestDB2Dao test2;
+
+	@Transactional
+	public void save() {
+		test1.saveTest("" + RandomUtils.nextInt(1, 100));
+		test2.saveTest("" + RandomUtils.nextInt(100, 200));
+
+		if (i > 2) {
+			throw new NullPointerException();
+		}
+		i++;
+	}
+}
+
+
+8.运行结果
+package cn.forever.demo;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import cn.forever.demo.datasource.Test2DBConfig;
+import cn.forever.demo.datasource.TestDBConfig;
+
+
+@SpringBootApplication
+@EnableConfigurationProperties(value = { TestDBConfig.class,Test2DBConfig.class })
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+}
+
+
+
+
+来自:http://bbs.itmayiedu.com/article/1498556236122
+
+
+
+
+
+
+
+
