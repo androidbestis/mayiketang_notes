@@ -1,0 +1,27 @@
+							Spring 事物手动回滚
+
+手动回滚:
+ 方法 1:
+     在 service 层方法的 catch 语句中增加：TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); 语句，手动回滚，这样上层就无需去处理异常（现在项目的做法）
+
+方法 2:
+    例如 service 层处理事务，那么 service 中的方法中不做异常捕获，或者在 catch 语句中最后增加 throw new RuntimeException()语句，以便让 aop 捕获异常再去回滚，并且在 service 上层（webservice 客户端，view 层 action）要继续捕获这个异常并处理
+
+  回滚 + 返回值:
+
+      //普通缴费  
+      @Transactional  
+      public String commonMoney(Receipt rpt,Moneyrecord mors){  
+          rpt.setState(1);  
+          int a=dao.insert(rpt);  
+          if(a<=0) return"缴费失败";  
+          mors.setPric(rpt.getPic());  
+          mors.setExid(rpt.getPid());  
+          mors.setState(1);  
+          boolean tf=mrs.custom(mors);  
+          if(!tf){  
+              TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();  
+              return"余额不足";  
+          }  
+          return "OK";  
+      }
