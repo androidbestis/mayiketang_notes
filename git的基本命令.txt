@@ -1,0 +1,20 @@
+						     Git的基本命令
+一、在github.com上创建新的仓库
+
+二、打开Git Shell,进入本地工程
+
+三、
+   git init
+   git add .
+   git commit -m "create project"
+   git remote add origin https://github.com/zhenghaishu/Forest.git(远程仓库地址)
+   git push -u origin master
+
+更新后提交
+   git add .
+   git commit -m "add some file"
+   git push
+
+
+撤销本地未提交的更改
+  git reset -hard
