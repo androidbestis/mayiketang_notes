@@ -1,0 +1,168 @@
+						java 服务器端解决跨域问题
+现在很多开发的 API 都支持 ajax 直接请求，这样就会导致跨域的问题，解决跨域的问题一方面可以从前端，另一方面就是服务器端。
+
+一、Controller类名上方添加@CrossOrigin 注解
+    通过此方式注解则Controller中的所有通过@RequestMapping注解的方法都可以进行跨域请求。 代码如下：
+    @CrossOrigin()
+    @RequestMapping("/demoController")
+    @Controller
+    public class DemoController {
+	@Autowired
+	IDemoService demoService;
+
+	@RequestMapping(value = "/test", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultModel test(HttpServletRequest request)
+			throws Exception {
+		return “right”;
+	}
+}
+
+二、让所有的controller类继承自定义的BaseController类,该类中将对返回的头部做些特殊处理。
+public abstract class BaseController {
+  /**
+     * description:send the ajax response back to the client side
+     * @param responseObj
+     * @param response
+     */
+    protected void writeAjaxJSONResponse(Object responseObj, HttpServletResponse response) {
+        response.setCharacterEncoding("UTF-8");
+
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+
+        /**
+         * for ajax-cross-domain request TODO get the ip address from
+         * configration(ajax-cross-domain.properties)
+         */
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        response.setDateHeader("Expires", 0); // Proxies.
+
+        PrintWriter writer = getWriter(response);
+
+        writeAjaxJSONResponse(responseObj, writer);
+    }
+  /**
+     *
+     * @param response
+     * @return
+     */
+    protected PrintWriter getWriter(HttpServletResponse response) {
+        if(null == response){
+            return null;
+        }
+
+        PrintWriter writer = null;
+
+        try {
+            writer = response.getWriter();
+        } catch (IOException e) {
+            logger.error("unknow exception", e);
+        }
+
+        return writer;
+    }
+
+    /**
+     * description:send the ajax response back to the client side.
+     *
+     * @param responseObj
+     * @param writer
+     * @param writer
+     */
+    protected void writeAjaxJSONResponse(Object responseObj, PrintWriter writer) {
+        if (writer == null || responseObj == null) {
+            return;
+        }
+        try {         writer.write(JSON.toJSONString(responseObj,SerializerFeature.DisableCircularReferenceDetect));
+        } finally {
+            writer.flush();
+            writer.close();
+        }
+    }
+}
+接下来就是我们自己业务的 controller 了，其中主要是要调用 writeAjaxJSONResponse(result, response); 这个方法
+@Controller
+@RequestMapping(value = "/account")
+public class AccountController extends BaseController {
+@RequestMapping(value = "/add", method = RequestMethod.POST)
+    public void addAccount(HttpSession session,HttpServletRequest request,HttpServletResponse response){
+        ViewerResult result = new ViewerResult();
+         //实现自己业务逻辑代码
+        writeAjaxJSONResponse(result, response);
+    }
+
+}
+好了，这种简单的方式就实现了。
+
+三、Filter,我们在写springMVC的时候，更喜欢的方式是通过@ResponseBody给返回对象进行封装直接返回给前端，这样简单而且容易。
+    如果使用@ResponseBody就不能使用第一种方法了，所有就使用filter给所有的请求都封装一下跨域，接下来直接实现代码：
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
+public class HeadersCORSFilter implements Filter {
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse servletResponse,
+            FilterChain chain) throws IOException, ServletException {
+         HttpServletResponse response = (HttpServletResponse) servletResponse;
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers", "x-requested-with,Authorization");
+            response.setHeader("Access-Control-Allow-Credentials","true");
+            chain.doFilter(request, servletResponse);
+
+    }
+
+    @Override
+    public void destroy() {
+        // TODO Auto-generated method stub
+
+    }
+
+}
+好了，filter 实现了，然后就是要在 web.xml 里面把这个 filter 运用起来了。
+打开项目的 web.xml，填写下面的几行代码：
+
+cors
+      xxx.xxxx.xxxxx.xxxx.HeadersCORSFilter
+    
+      cors
+      /open/*
+    
+好了，通过上面的3种方式，可以解决百分之80的跨域问题，也许还有更好的解决方案，可以提出来大家一起学习学习。
+最好的方案是最符合当前需求且易于扩展的。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
