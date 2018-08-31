@@ -1,0 +1,27 @@
+							服务的注册与发现（Eureka）
+
+1.spring cloud 为开发人员提供了快速构建分布式系统的一些工具，包括配置管理、服务发现、断路器、路由、微代理、事件总线、全局锁、决策竞选、分布式会话等等。它运行环境简单，可以在开发人员的电脑上跑。
+
+
+2.eureka是一个高可用的组件,它没有后端缓存,每一个实例注册之后需要向注册中心发送心跳(因此可以在内存中完成)
+  在默认情况下 erureka server 也是一个 eureka client , 必须要指定一个 server。通过 eureka.client.registerWithEureka：false 和 fetchRegistry：false 来表明自己是一个 eureka server。
+
+
+3.当client客户端向注册中心server注册时,它会提供一些[元数据],例如:主机、端口、url、主页等。
+  Eureka Server从每个client实例接收心跳消息.如果心跳超时,则通常将该实例从注册server中删除。
+
+
+4.需要指明 spring.application.name, 这个很重要，这在以后的服务与服务之间相互调用一般都是根据这个 name 。
+
+
+
+四、参考资料
+springcloud eureka server 官方文档
+
+springcloud eureka client 官方文档
+
+优秀文章推荐：
+史上最简单的 SpringCloud 教程 | 终章
+史上最简单的 SpringCloud 教程 | 第一篇: 服务的注册与发现（Eureka）
+史上最简单的 SpringCloud 教程 | 第七篇: 高可用的分布式配置中心(Spring Cloud Config)
+转载与 http://blog.csdn.net/forezp/article/details/69696915
