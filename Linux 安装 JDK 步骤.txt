@@ -1,0 +1,65 @@
+						Linux 安装 JDK 步骤
+
+Linux 安装 JDK 步骤
+
+1、先从网上下载 jdk(jdk-7u1-linux-i586.rpm)，下载地址:http://www.oracle.com/technetwork/java/javase/downloads/jdk-7u1-download-513651.html，下载后放在/home目录中，当然其它地方也行。
+
+
+2、进入安装目录 #cd /home #cp jdk-7u1-linux-i586.rpm /usr/local #cd /usr/local 给所有用户添加可执行的权限
+#rpm -ivh jdk-7u1-linux-i586.rpm
+
+
+3、设置环境变量
+#vi /etc/profile
+打开后，在文档最下方加上以下环境变量配置代码：
+
+export JAVA_HOME=/usr/java/javajdk1.7.0_01
+
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+export PATH=$JAVA_HOME/bin:$PATH
+
+注意：export PATH=$JAVA_HOME/bin:$PATH，注意将$PATH放到最后。以免造成新旧版本问题。
+编辑profile文档立即生效  source /etc/profile
+
+
+4、检查 JDK 是否安装成功。 #java -version 如果看到 JVM 版本及相关信息，即安装成功！
+
+———–分割线—————–
+
+当你已经成功把 javajdk1.7.0_01 安装到 /usr/java，并且配置好了系统环境变量 执行 # java -version 时就是 显示 javajdk1.7.0_01，是因为你的 linux 系统有默认的 jdk; 执行
+1、# cd /usr/bin
+
+ln -s -f /usr/java/javajdk1.7.0_01/jre/bin/java
+ln -s -f /usr/java/javajdk1.7.0_01/bin/javac
+2、接着卸载 javajdk1.7.0_01，再次重新安装。卸载方法：
+
+先查看 javajdk1.7.0_01 包名
+
+#rpm -qa | grep jdk
+
+
+
+接着执行
+
+#rpm -e jdk-1.7.0_01-fcs
+
+卸载完后，再次重新安装 jdk-7u1-linux-i586.rpm。
+
+===============
+
+我今天遇到问题后，就是这样解决的。大家如果也遇到类似问题，可以尝试下。
+
+如果有更好的解决方法。欢迎分享。
+
+========= 更新 11 月 16 日
+
+今天在 linux 下安装 tomcat 发现了点问题：
+
+后来卸载了 1.7 后，使用 jdk1.6 版本重新安装和配置
+
+在 /etc/profile 文件最后重新配置，加入两行
+
+export JAVA_HOME=/urs/java/jdk1.6
+
+export JRE_HOME=/usr/java/jdk1.6/jre
