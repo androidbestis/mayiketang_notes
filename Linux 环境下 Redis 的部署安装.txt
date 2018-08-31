@@ -1,0 +1,44 @@
+
+
+1. 上传 redis 的安装包
+利用 WinSCP 可视化工具，将 Windows 环境下的 redis.2.8.19.tar.gz 安装包上传到虚拟机的 Linux 中。
+
+
+2. 查看上传的文件
+
+
+3. 解压到当前目录
+tar -zxvf redis-2.8.19.tar.gz 解压到当前目录
+
+
+4. 进入解压目录编译make，将.c 编译成可执行.o 文件
+
+
+5. 安装到指定目录
+[root@www redis-2.8.19]# make PREFIX=/usr/local/redis install
+
+
+6. 拷贝 redis.conf 到指定目录
+[root@www redis-2.8.19]# cp redis.conf /usr/local/redis/
+安装路径下没有 redis.conf
+
+
+进入原编译目录找到 redis.conf
+
+
+
+7. 启动 redis
+进入安装目录 /usr/local/redis/bin 下有几个可执行文件
+
+
+redis-benchmark —-性能测试工具
+reids-check-aof —-检查修复 aof 文件 appendonly file 日志文件、数据持久化
+redis-check-dump —-检查快照持久化文件
+redis-cli —-命令行客户端
+redis-server —-redis 服务器启动命令
+启动:
+
+[root@www redis]# bin/redis-server
+
+
+端口号为：6379

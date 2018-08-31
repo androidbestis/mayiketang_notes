@@ -1,0 +1,68 @@
+						Redis 简介，安装和配置，停止，卸载
+
+Redis是一个 Key-value 的数据结构存储系统，可以已数据库的形式，缓存系统，消息处理器使用，它支持的存储类型很多，例如，String(字符串)，list(列表)，set(集合)，zset(有序集合)，还支持设置排序范围查询，位图，hyperloglogs 和半径查询地理信息的索引。redis内部实现使用 replication, Lua scripting, LRU eviction, transactions 以及周期性的把更新数据写入磁盘或者修改操作追加到文件的机制。它还能支持分布式，集群部署以及自带的集群管理工具。
+
+适合场景需求
+1.对数据高并发读写
+2.对海量数据的高效率存储以及访问
+3.提高数据的拓展性和使用性
+
+Redis 的安装和配置使用
+Redis 官方不支持 windows 的 Redis，所以我们在Linux下进行安装, 参照官方安装事例
+
+1.下载安装包
+wget http://download.redis.io/releases/redis-3.2.0.tar.gz
+
+
+
+2.解压安装包
+tar xzf redis-3.2.0.tar.gz
+
+
+
+3.编译源代码
+cd redis-3.2.0
+make
+
+
+
+4.查看编译是否成功，src 目录是否客户端和服务器相关命令
+cd src
+ll
+
+
+
+5.修改 redis 配置文件，配置成后台启动
+vi /home/sofepackage/redis-3.2.0/redis.conf
+
+
+
+6.启动 redis-server
+./redis-server /home/sofepackage/redis-3.2.0/redis.conf
+
+
+
+7.启动 redis-cli 客户端，并进程测试
+./redis-cli
+set foo bar
+get foo
+
+
+
+看到这里说明测试成功，我们把 redis 安装完成
+
+8.如何停止服务器
+
+
+
+在客户端里面输入 shutdown 命令即可，退出客户端用 exit
+
+9.卸载 redis 服务，只需把 /usr/local/bin/ 目录下的 redis 删除即可
+
+
+
+为了卸载干净，你还可以把解压和编译的 redis 包也给删除了
+
+
+
+到此所有过程完成……………..
