@@ -1,0 +1,27 @@
+							搭建 dubbo + zk 服务
+
+dubbo + zookeeper 搭建环境
+
+1.第一搭建 dubbo 服务，
+
+详细教程: Dubbo 分布式服务框架入门 ](http://bbs.itmayiedu.com/article/1495376255622)
+
+2.搭建完毕之后 装上 zookeeper，
+
+3.两个服务准备完毕之后，启动顺序如下：
+
+1.先启动 zookeeper 服务，再启动 dubbo 服务。
+
+2.再到项目中写入提供者 ，消费者去消费（使用）
+
+zk（zookeeper）
+
+Zookeeper 是一个分布式的，开放源码的分布式应用程序协调服务，是 Google 的 Chubby 一个开源的实现，是 Hadoop 和 Hbase 的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、名字服务、分布式同步、组服务等。
+
+之所以把本文归类为 Dubbo 是因为，博主关于 Dubbo 的学习笔记都是以 Zookeeper 作为注册中心的。
+
+Zookeeper 作为 Dubbo 服务的注册中心，Dubbo 原先基于数据库的注册中心，没采用 Zookeeper，Zookeeper 一个分布式的服务框架，是树型的目录服务的数据存储，能做到集群管理数据 ，这里能很好的作为 Dubbo 服务的注册中心，Dubbo 能与 Zookeeper 做到集群部署，当提供者出现断电等异常停机时，Zookeeper 注册中心能自动删除提供者信息，当提供者重启时，能自动恢复注册数据。
+
+关于 Zookeeper 的部署，但是在生产环境中，你最好部署 3，5，7 个节点。部署的越多，可靠性就越高。但是，我们作为本地自己熟练使用，部署一个就够了，部署一个 Zookeeper 是十分简单的。下面是单机部署 Zookeeper 的实例。
+
+url:http://blog.csdn.net/u013142781/article/details/50395650
