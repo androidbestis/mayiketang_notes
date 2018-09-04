@@ -1,0 +1,32 @@
+						apache-tomcat-7.0.40 加大内存配置	
+
+
+环境：(win7)
+
+64 位 apache-tomcat-7.0.40
+
+　打开这个文件 apache-tomcat-7.0.37\bin\catalina.bat，
+
+在 echo Using CATALINABASE: “%CATALINABASE%”的上面一行加下面代码：
+
+set JAVA_OPTS=-Xms1024m -Xmx4096m -XX:PermSize=128m -XX:MaxPermSize=256m
+
+加入后位置如下：
+
+rem —– Execute The Requested Command —————————————
+
+set JAVA_OPTS=-Xms1024m -Xmx4096m -XX:PermSize=128m -XX:MaxPermSize=256m
+
+echo Using CATALINABASE: “%CATALINABASE%”
+
+参数说明：
+
+-Xms：初始 Heap 大小，使用的最小内存,cpu 性能高时此值应设的大一些
+
+-Xmx：Java heap 最大值，使用的最大内存
+
+上面两个值是分配 JVM 的最小和最大内存，取决于硬件物理内存的大小，建议均设为物理内存的一半。
+
+-XX:PermSize:设定内存的永久保存区域
+
+-XX:MaxPermSize:设定最大内存的永久保存区域
