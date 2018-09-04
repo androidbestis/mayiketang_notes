@@ -1,0 +1,57 @@
+						springboot 获取上下文 bean
+
+
+/**
+ * 
+ * @classDesc: 功能描述:(Spring获取上下文工具类)
+ * @author: adonai
+ * @createTime: 2017年6月2日 下午3:59:37
+ * @version: v1.0
+ * @copyright:善林(上海)金融信息服务有限公司
+ */
+@Configuration
+@Slf4j
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class SpringContextUtil implements ApplicationContextAware {
+	private static ApplicationContext applicationContext;
+
+	@SuppressWarnings("static-access")
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	public static Object getBean(Class classname) {
+		try {
+			Object _restTemplate = applicationContext.getBean(classname);
+			return _restTemplate;
+		} catch (Exception e) {
+			log.error("###SpringContextUtil.class getBean()  ERROR:", e);
+			return null;
+		}
+	}
+
+	public static void setApplicationContext1(ApplicationContext context) {
+		applicationContext = context;
+	}
+
+}
+
+
+
+public class MemberApplication {
+	public static void main(String[] args) {
+		// SpringApplication.run(MemberApplication.class, args);
+		ApplicationContext applicationContext = SpringApplication.run(MemberApplication.class, args);
+		SpringContextUtil.setApplicationContext1(applicationContext);
+		RedisService redisService = (RedisService) SpringContextUtil.getBean(RedisService.class);
+		System.out.println(redisService.getClass());
+	}
+}
+
+
+
+转自:http://bbs.itmayiedu.com/article/1496390594775
+
+
+
