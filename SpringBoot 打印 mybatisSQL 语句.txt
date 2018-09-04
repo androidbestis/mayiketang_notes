@@ -1,0 +1,6 @@
+						SpringBoot 打印 mybatisSQL 语句
+
+
+SpringBoot 整合 mybatis 后如何打印 SQL 语句
+在 application.properties 文件中配置
+logging.level.com.*.mapper=DEBUG

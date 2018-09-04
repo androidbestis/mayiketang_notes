@@ -1,0 +1,25 @@
+						mybaits 注解形式批量插入数据
+
+
+摘要:mybatis注解形式批量插入数据
+
+mybaits　xml　文件配置形式很容易写出来。
+
+mybaits注解形式批量插入数据，就需要自己拼接成sql语句。
+
+@InsertProvider(type = UserMapperProvider.class, method = "inserAll")
+	int insertAll(List list);
+
+	public static class UserMapperProvider {
+
+		public String inserAll(Map> map) {
+			List list = map.get("list");
+			StringBuilder stringBuilder = new StringBuilder(256);
+			stringBuilder.append("insert into  \"spring42015user\" (\"loginName\", \"name\", \"password\", \"salt\",\"email\",\"status\",\"teamId\") values "); MessageFormat messageFormat = new MessageFormat("(#'{'list[{0}].loginName},#'{'list[{0}].name},#'{'list[{0}].password},#'{'list[{0}].salt},#'{'list[{0}].email},#'{'list[{0}].status},#'{'list[{0}].teamId})"); for (int i = 0; i < list.size(); i++) { stringBuilder.append(messageFormat.format(new Integer[]{i})); stringBuilder.append(","); } stringBuilder.setLength(stringBuilder.length() - 1); return stringBuilder.toString(); } } 
+
+上述代码是Ｈ２数据库ｓｑｌ语句．当然 mysql 也支持这种批量插入数据．
+
+
+
+转自:http://bbs.itmayiedu.com/article/1495539775523
+
