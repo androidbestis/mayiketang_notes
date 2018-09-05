@@ -1,0 +1,52 @@
+							Gradle配置详解
+
+
+一个使用gradle配置的项目:
+
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.6.RELEASE")
+    }
+}
+
+apply plugin: 'java'  //添加 Java 插件, 表明这是一个 Java 项目
+apply plugin: 'spring-boot' //添加 Spring-boot支持
+apply plugin: 'war'  //添加 War 插件, 可以导出 War 包
+apply plugin: 'eclipse' //添加 Eclipse 插件, 添加 Eclipse IDE 支持, Intellij Idea 为 "idea"
+
+war {
+    baseName = 'favorites'
+    version =  '0.1.0'
+}
+
+sourceCompatibility = 1.7  //最低兼容版本 JDK1.7
+targetCompatibility = 1.7  //目标兼容版本 JDK1.7
+
+repositories {     //  Maven 仓库
+    mavenLocal()        //使用本地仓库
+    mavenCentral()      //使用中央仓库
+    maven { url "http://repo.spring.io/libs-snapshot" } //使用远程仓库
+}
+ 
+dependencies {   // 各种 依赖的jar包
+    compile("org.springframework.boot:spring-boot-starter-web:1.3.6.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf:1.3.6.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa:1.3.6.RELEASE")
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile("org.springframework.boot:spring-boot-devtools:1.3.6.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-test:1.3.6.RELEASE")
+    compile 'org.webjars.bower:bootstrap:3.3.6'
+	compile 'org.webjars.bower:jquery:2.2.4'
+    compile("org.webjars:vue:1.0.24")
+	compile 'org.webjars.bower:vue-resource:0.7.0'
+
+}
+
+bootRun {
+    addResources = true
+}
