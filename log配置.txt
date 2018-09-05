@@ -1,0 +1,10 @@
+							log配置
+
+配置输出的地址和输出级别
+
+logging.path=/user/local/log
+logging.level.com.favorites=DEBUG
+logging.level.org.springframework.web=INFO
+logging.level.org.hibernate=ERROR
+
+path为本机的log地址，logging.level  后面可以根据包路径配置不同资源的log级别。

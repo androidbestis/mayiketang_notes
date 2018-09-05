@@ -1,0 +1,21 @@
+						Spring boot 自定义Property
+
+在web开发的过程中，我经常需要自定义一些配置文件，如何使用呢?
+ 
+
+1.配置在application.properties中
+  com.neo.title=纯洁的微笑
+  com.neo.description=分享生活和技术
+
+
+2.自定义配置类
+@Component
+public class NeoProperties {
+	@Value("${com.neo.title}")
+	private String title;
+	@Value("${com.neo.description}")
+	private String description;
+
+	//省略getter settet方法
+
+	}
