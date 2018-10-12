@@ -1,0 +1,20 @@
+                                       git 初次提交
+1.现在git.oschina.net上新建一个项目
+
+2.在本地目录下，执行如下命
+
+git init
+
+git add .
+
+git config user.name 'xxx'
+
+git config user.email '1111@qq.com'
+
+git pull https://git.oschina.net/xxx/maple.git master
+
+git remote add origin https://git.oschina.net/xxx/maple.git
+
+git commit -am 'init'
+
+git push -u origin master
