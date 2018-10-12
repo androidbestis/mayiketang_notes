@@ -1,0 +1,2 @@
+firewall-cmd --zone=public --add-port=18100/tcp --permanent   --开放18100端口
+firewall-cmd --reload     --重启防火墙
