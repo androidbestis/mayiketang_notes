@@ -1,0 +1,53 @@
+:: 关闭命令显示,如果没有设置,执行了哪些命令都会显示出来
+@echo off
+
+ ::执行这个命令后,增加或改动的环境变量只限于匹配到endlocal命令或者达到文件末尾
+ setlocal
+
+::---------------------------------------------------
+::            开始startup脚本                        
+::---------------------------------------------------
+
+set  "CURRENT_DIR=%cd%"
+
+
+if not "%CATALINA_HOME%" == ""  goto gotHome
+
+set "CATALINA_HOME=%CURRENT_DIR%"
+
+if exist "%CATALINA_HOME%\bin\catalina.bat" goto okHome
+
+cd ..
+set "CATALINA_HOME=%cd%"
+cd "%CURRENT_DIR%"
+
+
+:gotHome
+if exit "%CATALINA_HOME%\bin\catalina.bat" goto okHome
+echo The CATALINA_HOME environment variable is not defined correctly
+echo This environment variable is needed to run this program
+goto end
+
+
+:okHome
+set "EXECUTABLE=%CATALINA_HOME%\bin\catalina.bat"
+if exit "%EXECUTABLE%" goto okExec
+echo Cannot find "%EXECUTABLE%"
+echo This file is needed to run this program
+goto end
+
+
+:okExec
+set CMD_LINE_ARGS=
+echo okEexc
+:setArgs
+if ""%1""=="""" goto doneSetArgs
+set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
+shift
+goto setArgs
+
+
+:doneSetArgs
+call "%EXECUTABLE%" start "%CMD_LINE_ARGS%"
+
+:end
