@@ -1,0 +1,40 @@
+---Mybaties
+1.Class.isAssignableFrom();    反射中isAssignableFrom方法
+  isAssignableFrom()方法是：从类继承的角度去判断，instanceof()方法是：从实例继承的角度去判断。
+  isAssignableFrom()方法是：判断是否为某个类的父类，instanceof()方法是：判断是否某个类的子类。
+ https://www.cnblogs.com/bethunebtj/p/4681438.html
+
+
+Collections.unmodifiableMap返回的是一个不可修改的Map
+2.Collections.unmodifiableMap(TYPE_ALIASES)     
+
+
+
+
+---Tomcat
+1.StringTokenizer
+
+
+
+
+
+
+
+
+
+
+
+
+
+二叉树：
+ 1.斜树
+ 2.满二叉树
+ 3.完全二叉树
+ 4.平衡二叉树
+ 5.二叉搜索树
+ 6.红黑树
+ O(logN)
+
+
+
+

@@ -1,0 +1,16 @@
+				JVM 源码分析之一个 Java 进程究竟能创建多少线程
+
+
+这个问题可能有几种表述:
+ .一个java进程到底能创建多少线程？
+ .到底有哪些因素决定了能创建多少线程?
+ .java.lang.OutOfMemoryError: unable to create new native thread的异常究竟是怎么回事？
+
+
+从 JVM 说起
+  线程大家都很熟悉,new Thread(),start()即会创建一个线程,这里我首先指出一点new Thread()其实并不会创建一个真正的线程,只有在调用了start方法之后才会创建一个线程,这个大家分析下 Java 代码就知道了，Thread 的构造函数是纯 Java 代码，start 方法会调到一个 native 方法 start0 里，而 start0 其实就是JVM_StartThread这个方法。
+
+
+
+
+转自:https://mp.weixin.qq.com/s?__biz=MzIzNjI1ODc2OA==&mid=2650886922&idx=1&sn=4c95514fc43d9fe716b60bb923924863&scene=19##

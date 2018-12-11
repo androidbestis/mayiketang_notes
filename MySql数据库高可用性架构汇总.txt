@@ -1,0 +1,27 @@
+﻿																				MySql数据库高可用性架构
+1.MHA 高可用方案
+MHA(Master High Availability)通过管理节点自动化主服务器故障转移，快速将从服务器晋级为主服务器(通常在 10-30s)，而不影响复制的一致性, 适用于任何存储引擎。管理节点需要 ssh 链接 myql 服务器，高可用方面是一个相对成熟的解决方案。
+主要特征:
+       1.主服务器的自动监控和故障转移
+       2.交互式主服务器故障转移
+       3.非交互式的主故障转移
+       4.在线切换主从服务器   主要组成:master mysql,slave mysql,slave mysql(master备节点),管理节点
+     参考文章： 1.mysql-master-ha：mysql master 高可用性管理工具 2.mysql mha 主从自动切换 高可用
+
+
+2.MMM--MMM 高可用方案
+即 Master-Master Replication Manager for MySQL(mysql 主主复制管理器)
+MySQL 本身没有提供 replication failover 的解决方案，通过 MMM 方案能实现服务器的故障转移，从而实现 mysql 的高可用。
+MMM 不仅能提供浮动 IP 的功能，更可贵的是如果当前的主服务器挂掉后，会将你后端的从服务器自动转向新的主服务器进行同步复制，不用手工更改同步配置。
+
+3.Heartbeat+DRBD+mysql 高可用方案 
+采用 Heartbeat 双机热备软件来保证数据库的高稳定性和连续性，数据的一致性由 DRBD 这个工具来保证。
+默认情况下只有一台 mysql 在工作，当主 mysql 服务器出现问题后，系统将自动切换到备机上继续提供服务，当主数据库修复完毕，又将服务切回继续由主 mysql 提供服务。 适用于数据库访问量不太大，短期内访问量增长不会太快，对数据库可用性要求非常高的场景。
+
+4.Mysql cluster 
+MySQL Cluster 实际上是在无共享存储设备的情况下实现的一种完全分布式数据库系统，其主要通过 NDB Cluster(简称 NDB)存储引擎来实现。
+
+
+
+5.MySQL/Galera 集群-多主高可用性负载均衡 Galera 是一个 MySQL(也支持 MariaDB，Percona)的同步多主集群软件，目前只支持 InnoDB 引擎。
+       Galera 是一个 MySQL(也支持 MariaDB，Percona)的同步多主集群软件，目前只支持 InnoDB 引擎。

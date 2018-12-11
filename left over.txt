@@ -1,0 +1,10 @@
+springboot(四)：thymeleaf使用详解 http://www.ityouknow.com/springboot/2016/05/01/spring-boot-thymeleaf.html
+
+
+springboot(五)：spring data jpa的使用
+http://www.ityouknow.com/springboot/2016/08/20/spring-boo-jpa.html
+多表查询以下部分
+
+
+springboot实战：我们的第一款开源软件
+http://www.ityouknow.com/springboot/2016/09/26/spring-boot-opensource-favorites.html

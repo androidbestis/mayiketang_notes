@@ -1,0 +1,75 @@
+						Java 设计模式：代理模式 (Proxy)
+
+为另一个对象提供一个替身或占位符以控制对这个对象的访问，简而言之就是用一个对象来代表另一个对象。
+
+简单例子：有个接口 Italk,people 对象实现这个接口的 talk()方法，有些想另外加入 sing()方法，所以增加代理类 talkProxy，实现两个方法.
+public interface ITalk
+{
+    public void talk(String msg);
+}
+
+public class People implements ITalk
+{
+    @Override
+    public void talk(final String msg)
+    {
+        System.out.println(msg);
+    }
+}
+
+public class TalkProxy implements ITalk
+{
+    ITalk italk;
+
+    public TalkProxy(final ITalk italk)
+    {
+        this.italk = italk;
+    }
+
+    @Override
+    public void talk(final String msg)
+    {
+        this.italk.talk(msg);
+    }
+
+    public void sing(final String songName)
+    {
+        System.out.println("Song Name:" + songName);
+    }
+}
+
+public class Client
+{
+    public static void main(final String[] args)
+    {
+        final People people = new People();
+        people.talk("I can't sing");
+
+        final TalkProxy proxy = new TalkProxy(people);
+        proxy.talk("I can talk");
+        proxy.sing("I can sing");
+    }
+}
+
+结果：
+I can’t sing
+I can talk
+Song Name:I can sing
+
+常见的代理:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+rabbitMq使用erlang开发的RabbitMQ完全依赖Erlang的Cluster，因为erlang天生就是一门分布式语言,集群非常方便，但其本身并不支持负载均衡。Erlang的集群中各节点是经由过程一个magic cookie来实现的，这个cookie存放在 $home/.erlang.cookie 中(像我的root用户安装的就是放在我的root/.erlang.cookie中)，文件是400的权限。所以必须包管各节点cookie对峙一致，不然节点之间就无法通信。
+rabbitMQ集群：
+ 1.普通模式：默认的集群模式   erlang.cookie  对等同步
+   同步erlang.cookie文件，集群主机统一，通过Erlang的分布式特性（通过magic cookie认证节点）进行RabbitMQ集群，各RabbitMQ服务为对等节点，即每个节点都提供服务给客户端连接，进行消息发送与接收。
+ 2.镜像模式: 把需要的队列做成镜像队列
+ 3.主备模式：
+
+rabbitMQ的集群节点：
+ 1.内存节点:   将所有数据放在内存
+ 2.磁盘节点:   将所有数据放在磁盘
+ 不过,如果在投递消息时,打开了消息的持久化,那么即使是内存节点,数据还是安全的放在磁盘。
+
+
+
+
+运行模式大概有3种：
+
+单一模式：非集群模式，单台。
+普通模式：RabbitMQ默认的集群模式。
+镜像模式：Queue同时存在多个节点，可通过改模式实现HA高可用
